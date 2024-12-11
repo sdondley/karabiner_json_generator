@@ -1,0 +1,36 @@
+{
+  "title": "[% title %]",
+  "rules": [
+    [% FOREACH mapping IN mappings %]
+    {
+      "description": "[% IF mapping.modifier == 'double_tap_rshift' %]Double tap right shift[% ELSIF mapping.modifier == 'double_tap_lshift' %]Double tap left shift[% ELSIF mapping.modifier == 'lr_shift' %]Left then [% IF mapping.long_press %]long [% END %]right shift[% ELSIF mapping.modifier == 'rl_shift' %]Right then [% IF mapping.long_press %]long [% END %]left shift[% END %]-[% mapping.trigger_key %] to [% mapping.app_name %]",
+      "manipulators": [
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "name": "[% mapping.modifier %]",
+              "type": "variable_if",
+              "value": [% IF mapping.modifier.match('lr_shift|rl_shift') %][% IF mapping.long_press %]2[% ELSE %]1[% END %][% ELSE %]2[% END %]
+            }
+          ],
+          "from": { 
+            "key_code": "[% mapping.trigger_key %]"
+          },
+          "to": [
+            { 
+              "shell_command": "[% shell_command %] '[% mapping.app_name %]'"
+            },
+            {
+              "set_variable": {
+                "name": "[% mapping.modifier %]",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ]
+    }[% UNLESS loop.last %],[% END %]
+    [% END %]
+  ]
+}

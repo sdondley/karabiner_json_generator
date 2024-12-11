@@ -1,0 +1,55 @@
+app_activators:
+  title: "Application Launcher Test Suite"
+  shell_command: "/Users/steve/bin/master.sh"
+  mappings:
+    # Double tap right shift tests
+    - trigger_key: "s"
+      app_name: "Safari"
+      modifier: "double_tap_rshift"
+    - trigger_key: "c"
+      app_name: "Chrome"
+      modifier: "double_tap_rshift"
+    
+    # Double tap left shift tests
+    - trigger_key: "m"
+      app_name: "Mail"
+      modifier: "double_tap_lshift"
+    - trigger_key: "n"
+      app_name: "Notes"
+      modifier: "double_tap_lshift"
+    
+    # LR shift tests (quick press)
+    - trigger_key: "f"
+      app_name: "Finder"
+      modifier: "lr_shift"
+    - trigger_key: "i"
+      app_name: "iTerm2"
+      modifier: "lr_shift"
+    
+    # LR shift tests (long press)
+    - trigger_key: "s"
+      app_name: "System Settings"
+      modifier: "lr_shift"
+      long_press: true
+    - trigger_key: "a"
+      app_name: "Activity Monitor"
+      modifier: "lr_shift"
+      long_press: true
+    
+    # RL shift tests (quick press)
+    - trigger_key: "d"
+      app_name: "Discord"
+      modifier: "rl_shift"
+    - trigger_key: "v"
+      app_name: "Visual Studio Code"
+      modifier: "rl_shift"
+    
+    # RL shift tests (long press)
+    - trigger_key: "k"
+      app_name: "Karabiner-Elements"
+      modifier: "rl_shift"
+      long_press: true
+    - trigger_key: "p"
+      app_name: "Preview"
+      modifier: "rl_shift"
+      long_press: true
