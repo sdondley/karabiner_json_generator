@@ -73,5 +73,5 @@ To generate JSON files:
    
 3. Now copy over the generated json file to K-E and enable the rulesets. 
 
-## Bugs, Suggestions?
+## Bugs, Suggestions, Questions?
 Drop a message in the issue queue. I'll do my best to address your input.
