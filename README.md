@@ -29,8 +29,7 @@ Not to be confused with complex *modifications*, the Complex Modifier™️  Rul
 is just a set of key combination defintions designed to make it a no-brainer for
 you to add modifiers to your existing K-E configuration. 
 
-The current ruleset version consists of six complex modifiers which are
-contained:
+The current ruleset version consists of six complex modifiers:
 
 - **Double Tap Right Shift**: This complex modifier gets activated when the
   right shift key is double-tapped. You then have to press a trigger key before
