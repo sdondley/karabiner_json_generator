@@ -6,10 +6,11 @@ for generating JSON configurations for use with Karabiner-Elements (K-E). It's
 mostly here to showcase the Complex Modifiers™️  Ruleset I developed and will
 expand on as time permits.
 
-The goal here is to have you download and install the Complex Modifiers™️  into 
-your K-E configuration for your benefit. Secondarily, If you want, feel free to
-use the json_generator.pl script to generate triggers for activating desired
-events using the complex modifiers.
+The primary goal here is to make it convenient for you to add a new set of
+modifiers to you configuration quickly and easily. You just download and install
+the Complex Modifiers™️  into your K-E configuration. Secondarily, If you want,
+feel free to use the json_generator.pl script to generate triggers for
+activating desired events using the complex modifiers.
 
 ### What's Inside
 * This README file
@@ -76,8 +77,11 @@ To generate JSON files:
    ```bash
    perl generate_json.pl
    
-3. Now copy over the generated json file to K-E and enable the rulesets for your
-   triggers. 
+3. If your cross your fingers just right, your generated json file should appear
+   in the same directory as the perl script. Currently, if there is an error,
+   the script will silently die as if nothing is wrong. Sorry!
+4. Now copy over the generated json file into the K-E config directory and
+   enable the rulesets for your triggers. 
 
 ## Bugs, Suggestions, Questions?
 Drop a message in the issue queue. I'll do my best to address your input.
