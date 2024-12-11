@@ -7,7 +7,7 @@ mostly here to showcase the Complex Modifiers™️  Ruleset I developed and wil
 expand on as time permits.
 
 The primary goal here is to make it convenient for you to add a new set of
-modifiers to you configuration quickly and easily. You just download and install
+modifiers to your configuration quickly and easily. You just download and install
 the Complex Modifiers™️  into your K-E configuration. Secondarily, If you want,
 feel free to use the json_generator.pl script to generate triggers for
 activating desired events using the complex modifiers.
@@ -27,7 +27,7 @@ activating desired events using the complex modifiers.
 
 ### Complex Modifiers™️  Ruleset: What is it?
 Not to be confused with complex *modifications*, the Complex Modifier™️  Ruleset
-is just a set of key combination defintions designed to make it a no-brainer for
+is just a set of key combination definitions designed to make it a no-brainer for
 you to add modifiers to your existing K-E configuration. 
 
 The current ruleset version consists of six complex modifiers:
@@ -49,7 +49,10 @@ The current ruleset version consists of six complex modifiers:
   down and the left shift key long pressed.
 
 ### Trigger Keys Ruleset
-The trigger keys involve specific keys that execute actions when used with complex modifiers. These keys trigger the predefined functionalities according to the complex modifiers' conditions. The trigger key rules are also deteremined by what you put in the yaml file. 
+The trigger keys involve specific keys that execute
+actions when used with complex modifiers. These keys trigger the predefined
+functionalities according to the complex modifiers' conditions. The trigger key
+rules are also determined by what you put in the yaml file. 
 
 You can associated triggers with any complex modifier using the yaml file. Look
 at the example yaml file to see how this is done.
@@ -57,7 +60,7 @@ at the example yaml file to see how this is done.
 ## Getting It all Working
 
 The steps below assume your know a little bit about adding rulesets to K-E
-so doesn't go into great deail on where to click.
+so doesn't go into great detail on where to click.
 If you are unclear, consult the K-E documentation at: 
 https://karabiner-elements.pqrs.org/docs/getting-started/configuration/.
 
