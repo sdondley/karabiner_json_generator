@@ -2,7 +2,9 @@
 
 ## About
 This repository contains the Karabiner JSON Generator, a crude, unfinished tool
-for generating JSON configurations for use with Karabiner-Elements (K-E). 
+for generating JSON configurations for use with Karabiner-Elements (K-E). It's
+mostly here to showcase the Complex Modifiers™️  Ruleset I developed and will
+expand on as time permits.
 
 ### What's Inside
 * This README file
