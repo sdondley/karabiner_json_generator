@@ -70,7 +70,7 @@ To use these rulesets:
 2. Go to the 'Complex Modifications' tab in Karabiner-Elements.
 3. Add in the complex modifiers you wish to use with your triggers.
 
-## Generating JSON Files
+### Generating JSON Files
 To generate JSON files:
 1. Configure the yaml file. Use the supplied example file as reference.
 2. To generate a new JSON configuration, simply run the script. Currently, there are no options or arguments to pass to the script.
@@ -78,7 +78,8 @@ To generate JSON files:
    ```bash
    perl generate_json.pl
    
-3. Now copy over the generated json file to K-E and enable the rulesets. 
+3. Now copy over the generated json file to K-E and enable the rulesets for your
+   triggers. 
 
 ## Bugs, Suggestions, Questions?
 Drop a message in the issue queue. I'll do my best to address your input.
