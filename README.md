@@ -55,10 +55,9 @@ at the example yaml file to see how this is done.
 
 ## Getting It all Working
 
-The below steps assume your know a little bit about adding in rulesets to K-E.
-If you are unclear, consult the K-E documentation. The below steps assume your
-know a little bit about adding in rulesets. If you are unclear, consult the K-E
-documentation at
+The steps below assume your know a little bit about adding rulesets to K-E
+so doesn't go into great deail on where to click.
+If you are unclear, consult the K-E documentation at: 
 https://karabiner-elements.pqrs.org/docs/getting-started/configuration/.
 
 ### Activation of Complex Modifiers™️  Rulesets
