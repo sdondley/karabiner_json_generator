@@ -1,0 +1,7 @@
+# Default paths for Karabiner-Elements
+karabiner:
+  # Config directory - defaults to standard KE directory if not set
+  config_dir: "~/.config/karabiner"
+  
+  # Complex modifications directory - defaults to standard location if not set
+  complex_mods_dir: "~/.config/karabiner/assets/complex_modifications"
