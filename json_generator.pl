@@ -55,7 +55,7 @@ sub fmt_print {
     if ($style eq 'error' && $has_emoji) {
         return "❌ $text";
     } elsif ($style eq 'success' && $has_emoji) {
-        return "✅ $text";
+        return "✅  $text";
     } elsif ($style eq 'warn' && $has_emoji) {
         return "⚠️  $text";
     } elsif ($style eq 'info' && $has_emoji) {
@@ -163,8 +163,96 @@ foreach my $template_file (@template_files) {
     }
 }
 
-# Rest of the script remains the same...
-# (Copy all the remaining validation and installation code from the original)
+# Track core configuration file
+my $complex_modifiers_file = File::Spec->catfile(dirname($0), 'complex_modifiers.json');
+my $has_complex_modifiers = -f $complex_modifiers_file;
+
+# Validate and install generated files if karabiner_cli is available
+if (-x $cli_path) {
+    print fmt_print("Validating generated files...", 'info'), "\n" unless $opts{q};
+    my $all_valid = 1;
+
+    # Validate generated files
+    foreach my $file (@generated_files) {
+        print fmt_print("Checking $file...", 'info'), " " unless $opts{q};
+        my $result;
+        if ($opts{q}) {
+            $result = system("'$cli_path' --lint-complex-modifications $file >/dev/null 2>&1");
+        } else {
+            $result = system($cli_path, '--lint-complex-modifications', $file);
+        }
+        if ($result == 0) {
+            print fmt_print("OK", 'success'), "\n" unless $opts{q};
+        } else {
+            print fmt_print("FAILED", 'error', 1), "\n";
+            $all_valid = 0;
+        }
+    }
+
+    # Also validate complex_modifiers.json if present
+    if ($has_complex_modifiers) {
+        print fmt_print("Checking complex_modifiers.json...", 'info'), " " unless $opts{q};
+        my $result;
+        if ($opts{q}) {
+            $result = system("'$cli_path' --lint-complex-modifications $complex_modifiers_file >/dev/null 2>&1");
+        } else {
+            $result = system($cli_path, '--lint-complex-modifications', $complex_modifiers_file);
+        }
+        if ($result == 0) {
+            print fmt_print("OK", 'success'), "\n" unless $opts{q};
+        } else {
+            print fmt_print("FAILED", 'error', 1), "\n";
+            $all_valid = 0;
+        }
+    }
+
+    if ($all_valid) {
+        my $should_install = 0;
+        if ($opts{i}) {
+            $should_install = 1;
+            print fmt_print("Auto-installing files due to -i flag...", 'info'), "\n" unless $opts{q};
+        } elsif (!$opts{q}) {
+            print fmt_print("All files passed validation.", 'success'), "\n";
+            print "\nProcesssing complete. Would you like to install the files to $complex_mods_dir? [y/N] ";
+            my $answer = <STDIN>;
+            chomp $answer;
+            $should_install = lc($answer) eq 'y' || lc($answer) eq 'yes';
+        }
+        # Modify the installation section to copy from generated_json directory
+        if ($should_install) {
+            print fmt_print("Installing to $complex_mods_dir...", 'info'), "\n" unless $opts{q};
+
+            # Create directory if it doesn't exist
+            make_path($complex_mods_dir);
+
+            # Copy generated files from generated_json directory
+            foreach my $file (@generated_files) {
+                my $base = basename($file);
+                my $dest = File::Spec->catfile($complex_mods_dir, $base);
+                copy($file, $dest) or die fmt_print("Failed to copy $file to $dest: $!", 'error');
+                print fmt_print("Installed $base", 'success'), "\n" unless $opts{q};
+            }
+
+            # Copy complex_modifiers.json if present
+            if ($has_complex_modifiers) {
+                my $dest = File::Spec->catfile($complex_mods_dir, 'complex_modifiers.json');
+                copy($complex_modifiers_file, $dest) or die fmt_print("Failed to copy complex_modifiers.json to $dest: $!", 'error');
+                print fmt_print("Installed complex_modifiers.json", 'success'), "\n" unless $opts{q};
+            } else {
+                print fmt_print("Warning: complex_modifiers.json not found in script directory", 'warn', 1), "\n";
+            }
+
+            print fmt_print("Installation complete", 'success'), "\n" unless $opts{q};
+        } else {
+            print fmt_print("Installation skipped", 'info'), "\n" unless $opts{q};
+        }
+    } else {
+        print fmt_print("Some files failed validation. Not installing.", 'error', 1), "\n";
+        exit 1;
+    }
+} else {
+    print fmt_print("Warning: karabiner_cli not found at $cli_path. Skipping validation and installation.", 'warn', 1), "\n";
+}
 
 sub max {
     my ($a, $b) = @_;
