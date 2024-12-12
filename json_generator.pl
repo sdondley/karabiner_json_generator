@@ -16,6 +16,10 @@ use File::Path qw(make_path);
 our %opts;
 getopts('diq', \%opts);  # Added 'q' option for quiet mode
 
+# Create generated_json directory if it doesn't exist
+my $generated_dir = "generated_json";
+make_path($generated_dir) unless -d $generated_dir;
+
 # Check terminal capabilities
 my $has_color = 0;
 my $has_emoji = 0;
@@ -137,8 +141,8 @@ foreach my $template_file (@template_files) {
         # Create JSON encoder with specific formatting
         my $json = JSON->new->indent(1)->space_after(0)->space_before(0);
 
-        # Write to output file
-        my $output_file = "$base_name.json";
+        # Write to output file in generated_json directory
+        my $output_file = File::Spec->catfile($generated_dir, "$base_name.json");
         open(my $fh, '>', $output_file) or die fmt_print("Cannot open output file $output_file: $!", 'error');
         print $fh $json->encode($json_obj);
         close($fh);
@@ -215,18 +219,19 @@ if (-x $cli_path) {
             chomp $answer;
             $should_install = lc($answer) eq 'y' || lc($answer) eq 'yes';
         }
-
+        # Modify the installation section to copy from generated_json directory
         if ($should_install) {
             print fmt_print("Installing to $complex_mods_dir...", 'info'), "\n" unless $opts{q};
 
             # Create directory if it doesn't exist
             make_path($complex_mods_dir);
 
-            # Copy generated files
+            # Copy generated files from generated_json directory
             foreach my $file (@generated_files) {
-                my $dest = File::Spec->catfile($complex_mods_dir, $file);
+                my $base = basename($file);
+                my $dest = File::Spec->catfile($complex_mods_dir, $base);
                 copy($file, $dest) or die fmt_print("Failed to copy $file to $dest: $!", 'error');
-                print fmt_print("Installed $file", 'success'), "\n" unless $opts{q};
+                print fmt_print("Installed $base", 'success'), "\n" unless $opts{q};
             }
 
             # Copy complex_modifiers.json if present
