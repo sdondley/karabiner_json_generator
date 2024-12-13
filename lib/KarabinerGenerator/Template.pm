@@ -88,23 +88,56 @@ sub process_templates {
 
     foreach my $template_file (@template_files) {
         my ($base_name, undef, undef) = fileparse($template_file, qr/\.json\.tpl$/);
+        my $output_file = File::Spec->catfile($output_dir, "$base_name.json");
 
-        # Read template file
+        # Handle both production and test configs
+        my $template_config = $config;
+        if ($config->{app_activators}) {
+            $template_config = $config->{app_activators};
+        }
+
+        # Skip empty templates in production
+        if ($base_name =~ /^app_activators_/) {
+            my $modifier_type = $base_name;
+            $modifier_type =~ s/^app_activators_//;
+
+            if ($template_config->{modifiers}) {
+                my $has_entries = 0;
+                if ($modifier_type eq 'dtrs') {
+                    $has_entries = exists $template_config->{modifiers}{double_tap_rshift}{apps} &&
+                                 @{$template_config->{modifiers}{double_tap_rshift}{apps}} > 0;
+                }
+                elsif ($modifier_type eq 'dtls') {
+                    $has_entries = exists $template_config->{modifiers}{double_tap_lshift}{apps} &&
+                                 @{$template_config->{modifiers}{double_tap_lshift}{apps}} > 0;
+                }
+                elsif ($modifier_type eq 'lrs') {
+                    $has_entries = exists $template_config->{modifiers}{lr_shift}{quick_press} &&
+                                 @{$template_config->{modifiers}{lr_shift}{quick_press}} > 0;
+                }
+                elsif ($modifier_type eq 'rls') {
+                    $has_entries = exists $template_config->{modifiers}{rl_shift}{quick_press} &&
+                                 @{$template_config->{modifiers}{rl_shift}{quick_press}} > 0;
+                }
+
+                if (!$has_entries) {
+                    unlink $output_file if -f $output_file;
+                    next;
+                }
+            }
+        }
+
+        # Read and process template
         open(my $tfh, '<', File::Spec->catfile($template_dir, $template_file))
             or croak "Cannot open template $template_file: $!\n";
-        local $/;
-        my $template_content = <$tfh>;
+        my $template_content = do { local $/; <$tfh> };
         close($tfh);
 
-        # Process template
         my $output;
-        my $template_vars = $config;
-
-        unless ($tt->process(\$template_content, $template_vars, \$output)) {
+        unless ($tt->process(\$template_content, $template_config, \$output)) {
             croak "Template processing failed: " . $tt->error() . "\n";
         }
 
-        # Parse JSON and re-encode with ordered keys
         my $json_obj;
         eval {
             $json_obj = decode_json($output);
@@ -113,13 +146,9 @@ sub process_templates {
             croak "JSON parsing error in $template_file: $@\n";
         }
 
-        # Create output file path
-        my $output_file = File::Spec->catfile($output_dir, "$base_name.json");
-
-        # Write ordered JSON to output file
         open(my $fh, '>', $output_file)
             or croak "Cannot open output file $output_file: $!\n";
-        print $fh _ordered_encode($json_obj);  # Now includes proper indentation
+        print $fh _ordered_encode($json_obj);
         close($fh);
 
         push @generated_files, $output_file;

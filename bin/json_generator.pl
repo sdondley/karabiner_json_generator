@@ -95,15 +95,26 @@ print fmt_print("Starting JSON generation process...", 'info'), "\n" unless $opt
 my $template_file = "app_activators_dtls.json.tpl";
 print fmt_print("Processing template: $template_file", 'info'), "\n" unless $opts{quiet};
 
-my @generated_files = eval {
-    process_templates(
-        "templates",
-        load_config("config.yaml")->{app_activators},
-        "generated_json"
-    );
-};
-if ($@) {
-    die fmt_print("Template processing failed: $@", 'error'), "\n";
+my @generated_files;
+{
+    local $@;  # Localize $@ to prevent contamination
+    @generated_files = eval {
+        process_templates(
+            "templates",
+            load_config("config.yaml")->{app_activators},
+            "generated_json"
+        );
+    };
+    if ($@) {
+        my $error = $@;  # Copy error before it can be clobbered
+        if ($error =~ /Template error:/) {
+            die fmt_print("Template syntax error: $error", 'error'), "\n";
+        }
+        elsif ($error =~ /Cannot (?:read|write|open) file/) {
+            die fmt_print("File operation failed: $error", 'error'), "\n";
+        }
+        die fmt_print("Template processing failed: $error", 'error'), "\n";
+    }
 }
 
 foreach my $file (@generated_files) {

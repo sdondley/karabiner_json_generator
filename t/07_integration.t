@@ -20,9 +20,11 @@ my $template_dir = File::Spec->catdir($temp_dir, 'templates');
 my $output_dir = File::Spec->catdir($temp_dir, 'generated_json');
 make_path($template_dir, $output_dir);
 
-# Create test config
-my $config_content = qq{
-app_activators_dtls:
+# Test complete pipeline
+subtest 'Template Processing Pipeline' => sub {
+    # Create test config with app_activators structure
+    my $config_content = qq{
+app_activators:
   title: "Test App Activators"
   shell_command: "/test/path/script.sh"
   modifiers:
@@ -32,20 +34,20 @@ app_activators_dtls:
           app_name: "Safari"
         - trigger_key: "c"
           app_name: "Chrome"
-};
+    };
 
-my $config_file = File::Spec->catfile($temp_dir, 'config.yaml');
-open my $config_fh, '>', $config_file or die "Cannot create config file: $!";
-print $config_fh $config_content;
-close $config_fh;
+    my $config_file = File::Spec->catfile($temp_dir, 'config.yaml');
+    open my $config_fh, '>', $config_file or die "Cannot create config file: $!";
+    print $config_fh $config_content;
+    close $config_fh;
 
-# Create test template
-my $template_content = q{
+    # Create test template matching app_activators structure
+    my $template_content = q{
 {
-  "title": "[% app_activators_dtls.title %]",
+  "title": "[% title %]",
   "rules": [
     [%- SET first = 1 -%]
-    [%- FOREACH app IN app_activators_dtls.modifiers.double_tap_rshift.apps -%]
+    [%- FOREACH app IN modifiers.double_tap_rshift.apps -%]
     [%- IF !first %],[% END -%]
     [%- SET first = 0 -%]
     {
@@ -61,28 +63,26 @@ my $template_content = q{
           "key_code": "[% app.trigger_key %]"
         },
         "to": [{
-          "shell_command": "[% app_activators_dtls.shell_command %] '[% app.app_name %]'"
+          "shell_command": "[% shell_command %] '[% app.app_name %]'"
         }]
       }]
     }
     [%- END -%]
   ]
 }
-};
+    };
 
-my $template_file = File::Spec->catfile($template_dir, 'app_activators_dtls.json.tpl');
-open my $template_fh, '>', $template_file or die "Cannot create template file: $!";
-print $template_fh $template_content;
-close $template_fh;
+    my $template_file = File::Spec->catfile($template_dir, 'app_activators_dtrs.json.tpl');
+    open my $template_fh, '>', $template_file or die "Cannot create template file: $!";
+    print $template_fh $template_content;
+    close $template_fh;
 
-# Test complete pipeline
-subtest 'Template Processing Pipeline' => sub {
     plan tests => 9;
 
     # Load config
     my $config = load_config($config_file);
     ok($config, 'Configuration loaded');
-    ok($config->{app_activators_dtls}, 'Config contains expected data');
+    ok($config->{app_activators}, 'Config contains expected data');
 
     # Process templates
     my @generated_files = process_templates($template_dir, $config, $output_dir);
@@ -106,6 +106,96 @@ subtest 'Template Processing Pipeline' => sub {
 
     like($safari_rule->{manipulators}[0]{to}[0]{shell_command}, qr{/test/path/script\.sh 'Safari'}, 'Safari command correct');
     like($chrome_rule->{manipulators}[0]{to}[0]{shell_command}, qr{/test/path/script\.sh 'Chrome'}, 'Chrome command correct');
+};
+
+# Test empty modifier handling
+subtest 'Empty Complex Modifier Handling' => sub {
+    plan tests => 4;
+
+    # Create test configs - one with entries, one without
+    my $config_with_entries = qq{
+app_activators:
+  title: "Test App Activators"
+  shell_command: "/test/path/script.sh"
+  modifiers:
+    double_tap_rshift:
+      apps:
+        - trigger_key: "s"
+          app_name: "Safari"
+    };
+
+    my $config_without_entries = qq{
+app_activators:
+  title: "Test App Activators"
+  shell_command: "/test/path/script.sh"
+  modifiers:
+    double_tap_rshift:
+      apps: []
+    };
+
+    my $config_file = File::Spec->catfile($temp_dir, 'config.yaml');
+
+    # Create template for double tap right shift
+    my $template_content = q{
+{
+  "title": "[% title %]",
+  "rules": [
+    [%- FOREACH app IN modifiers.double_tap_rshift.apps -%]
+    {
+      "description": "Double tap right shift-[% app.trigger_key %] to [% app.app_name %]",
+      "manipulators": [{
+        "type": "basic",
+        "conditions": [{
+          "type": "variable_if",
+          "name": "double_tap_rshift",
+          "value": 2
+        }],
+        "from": {
+          "key_code": "[% app.trigger_key %]"
+        },
+        "to": [{
+          "shell_command": "[% shell_command %] '[% app.app_name %]'"
+        }]
+      }]
+    }[% IF !loop.last %],[% END %]
+    [%- END -%]
+  ]
+}
+    };
+
+    my $template_file = File::Spec->catfile($template_dir, 'app_activators_dtrs.json.tpl');
+    open my $template_fh, '>', $template_file or die "Cannot create template file: $!";
+    print $template_fh $template_content;
+    close $template_fh;
+
+    # Test with entries
+    {
+        open my $fh, '>', $config_file or die "Cannot create config file: $!";
+        print $fh $config_with_entries;
+        close $fh;
+
+        my @files = process_templates($template_dir, load_config($config_file), $output_dir);
+        ok(@files > 0, "Files generated when entries exist");
+        ok(-f $files[0], "Generated file exists");
+    }
+
+    # Test without entries
+    {
+        # First create a file that should be removed
+        my $empty_file = File::Spec->catfile($output_dir, "app_activators_dtrs.json");
+        open my $fh, '>', $empty_file or die "Cannot create test file: $!";
+        print $fh "{}";
+        close $fh;
+
+        # Now process empty config
+        open $fh, '>', $config_file or die "Cannot create config file: $!";
+        print $fh $config_without_entries;
+        close $fh;
+
+        my @files = process_templates($template_dir, load_config($config_file), $output_dir);
+        is(scalar @files, 0, "No files generated for empty config");
+        ok(!-f $empty_file, "Previous file removed when config is empty");
+    }
 };
 
 done_testing();
