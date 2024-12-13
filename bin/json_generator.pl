@@ -1,4 +1,27 @@
 #!/usr/bin/env perl
+
+=head1 NAME
+
+json_generator.pl - Generate Karabiner-Elements JSON configuration files
+
+=head1 SYNOPSIS
+
+json_generator.pl [options]
+
+ Options:
+   -h, --help     Show this help message
+   -d, --debug    Enable debug output
+   -i, --install  Automatically install after generation
+   -q, --quiet    Minimize output messages
+
+=head1 DESCRIPTION
+
+This script generates JSON configuration files for Karabiner-Elements from YAML templates.
+It can validate the generated files and optionally install them into your Karabiner-Elements
+configuration directory.
+
+=cut
+
 use strict;
 use warnings;
 use FindBin qw($RealBin);
@@ -20,22 +43,44 @@ my %opts = (
     debug   => 0,
     quiet   => 0,
     install => 0,
-    version => 0,
 );
 
-GetOptions(
-    'h|help'      => \$opts{help},
-    'd|debug'     => \$opts{debug},
-    'q|quiet'     => \$opts{quiet},
-    'i|install'   => \$opts{install},
-    'v|version'   => \$opts{version},
-) or pod2usage(2);
+# Update GetOptions to handle help and capture errors
+{
+    local $SIG{__WARN__} = sub {
+        my $msg = shift;
+        if ($msg =~ /Unknown option/) {
+            print STDERR fmt_print($msg, 'error'), "\n";
+            pod2usage(
+                -exitval => 1,
+                -verbose => 0,
+                -output  => \*STDERR
+            );
+        } else {
+            warn $msg;
+        }
+    };
+
+    GetOptions(
+        'h|help'      => \$opts{help},
+        'd|debug'     => \$opts{debug},
+        'q|quiet'     => \$opts{quiet},
+        'i|install'   => \$opts{install},
+    ) or pod2usage(1);
+}
+
+# Show help if requested
+pod2usage(
+    -exitval => 0,
+    -verbose => 1,
+) if $opts{help};
 
 $ENV{QUIET} = 1 if $opts{quiet};
 
 if ($opts{debug}) {
     my ($has_color, $has_emoji) = detect_capabilities();
-    print "Terminal debug info:\n";
+    print fmt_print("Debug Mode Enabled", 'info'), "\n\n";
+    print fmt_print("Terminal Capabilities:", 'info'), "\n";
     print "TERM_PROGRAM: ", ($ENV{TERM_PROGRAM} || "not set"), "\n";
     print "TERM: ", ($ENV{TERM} || "not set"), "\n";
     print "LC_TERMINAL: ", ($ENV{LC_TERMINAL} || "not set"), "\n";

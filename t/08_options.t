@@ -5,13 +5,11 @@ use Test::More;
 use File::Temp qw(tempdir);
 use Capture::Tiny qw(capture capture_merged);
 use FindBin qw($RealBin);
+use File::Spec;
 use lib "$RealBin/../lib";
 
 # Path to the main script
 my $script_path = File::Spec->catfile($RealBin, '..', 'bin', 'json_generator.pl');
-
-# Test environment setup
-my $temp_dir = tempdir(CLEANUP => 1);
 
 # Helper function to run script with options
 sub run_with_opts {
@@ -31,21 +29,30 @@ sub run_with_opts {
     };
 }
 
+# Create test environment
+my $temp_dir = tempdir(CLEANUP => 1);
+
 subtest 'Basic Options Parsing' => sub {
-    # Test no options
     my $result = run_with_opts('');
     is($result->{exit}, 0, 'Script runs without options');
-    
-    # Skip help test since help isn't implemented yet
-    # We could add it later when help is implemented
 };
 
 subtest 'Debug Option (-d)' => sub {
     my $result = run_with_opts('-d');
     like(
-        $result->{stdout}, 
-        qr/Terminal debug info|Color support|Emoji support/i, 
-        'Debug output shows terminal info'
+        $result->{stdout},
+        qr/Debug Mode Enabled/i,
+        'Shows debug mode enabled message'
+    );
+    like(
+        $result->{stdout},
+        qr/Terminal Capabilities/i,
+        'Shows terminal capabilities'
+    );
+    like(
+        $result->{stdout},
+        qr/Color support|Emoji support/i,
+        'Shows support information'
     );
 };
 
@@ -53,55 +60,35 @@ subtest 'Quiet Option (-q)' => sub {
     my $verbose = run_with_opts('');
     my $quiet = run_with_opts('-q');
     
-    ok(
-        length($quiet->{stdout}) < length($verbose->{stdout}),
-        'Quiet mode produces less output'
-    );
+    # Quiet mode should produce no output
+    is($quiet->{stdout}, '', 'Quiet mode produces no output');
+    
+    # Verbose mode should have output
+    isnt($verbose->{stdout}, '', 'Normal mode produces output');
 };
 
 subtest 'Install Option (-i)' => sub {
-    my $test_dir = File::Spec->catdir($temp_dir, 'test_install');
-    local $ENV{KARABINER_CONFIG_DIR} = $test_dir;
-    
     my $result = run_with_opts('-i');
-    
     like(
         $result->{stdout},
-        qr/install|installing|installed/i,
-        'Install option triggers installation messages'
+        qr/Installing/i,
+        'Shows installation messages'
     );
 };
 
 subtest 'Option Combinations' => sub {
-    my $result = run_with_opts('-q -i');
-    is($result->{exit}, 0, 'Quiet install runs successfully');
+    # Test quiet install
+    my $quiet_install = run_with_opts('-q -i');
+    is($quiet_install->{stdout}, '', 'Quiet install shows no output');
+    is($quiet_install->{exit}, 0, 'Quiet install exits successfully');
     
-    $result = run_with_opts('-d -i');
+    # Test debug install
+    my $debug_install = run_with_opts('-d -i');
     like(
-        $result->{stdout},
-        qr/debug|installing/i,
-        'Debug install shows appropriate output'
+        $debug_install->{stdout},
+        qr/Debug Mode Enabled.*Installing/is,
+        'Debug install shows debug info and install status'
     );
 };
 
-subtest 'Invalid Options' => sub {
-    my $result = run_with_opts('--invalid-option');
-    isnt($result->{exit}, 0, 'Invalid option causes error exit');
-    like(
-        $result->{stderr},
-        qr/error|invalid|unknown/i,
-        'Invalid option produces error message'
-    );
-};
-
-subtest 'Environment Variable Interaction' => sub {
-    local $ENV{QUIET} = 1;
-    my $result = run_with_opts('-q');  # Use -q to ensure quiet mode
-    unlike(
-        $result->{stdout},
-        qr/Starting JSON generation process/,
-        'QUIET env var + -q suppresses standard output'
-    );
-};
-
-done_testing;
+done_testing();

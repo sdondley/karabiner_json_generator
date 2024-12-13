@@ -6,8 +6,6 @@ app_activators:
       apps:
         - trigger_key: "s"
           app_name: "Safari"
-        - trigger_key: "c"
-          app_name: "Chrome"
     
     double_tap_lshift:
       apps:
@@ -20,7 +18,7 @@ app_activators:
       quick_press:
         - trigger_key: "f"
           app_name: "Finder"
-        - trigger_key: "t"
+        - trigger_key: "i"
           app_name: "iTerm"
       long_press:
         - trigger_key: "s"
@@ -32,8 +30,6 @@ app_activators:
       quick_press:
         - trigger_key: "d"
           app_name: "Discord"
-        - trigger_key: "v"
-          app_name: "Visual Studio Code"
       long_press:
         - trigger_key: "k"
           app_name: "Karabiner-Elements"
