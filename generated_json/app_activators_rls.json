@@ -1,4 +1,5 @@
 {
+   "title" : "App Activators - Right-Left Shift Sequence Triggers",
    "rules" : [
       {
          "manipulators" : [
@@ -8,10 +9,6 @@
                      "shell_command" : "/Users/steve/bin/master.sh 'Discord'"
                   }
                ],
-               "from" : {
-                  "key_code" : "d"
-               },
-               "type" : "basic",
                "to_after_key_up" : [
                   {
                      "set_variable" : {
@@ -23,32 +20,33 @@
                "conditions" : [
                   {
                      "name" : "rl_shift",
-                     "value" : 1,
-                     "type" : "variable_if"
+                     "type" : "variable_if",
+                     "value" : 1
                   }
-               ]
+               ],
+               "from" : {
+                  "key_code" : "d"
+               },
+               "type" : "basic"
             }
          ],
          "description" : "Right-Left shift quick press + d to Discord"
       },
       {
+         "description" : "Right-Left shift long press + k to Karabiner-Elements",
          "manipulators" : [
             {
                "to" : [
                   {
                      "set_notification_message" : {
-                        "text" : "",
-                        "id" : "org.pqrs.long_rl_shift"
+                        "id" : "org.pqrs.long_rl_shift",
+                        "text" : ""
                      }
                   },
                   {
                      "shell_command" : "/Users/steve/bin/master.sh 'Karabiner-Elements'"
                   }
                ],
-               "from" : {
-                  "key_code" : "k"
-               },
-               "type" : "basic",
                "to_after_key_up" : [
                   {
                      "set_variable" : {
@@ -59,22 +57,32 @@
                ],
                "conditions" : [
                   {
-                     "name" : "rl_shift",
                      "type" : "variable_if",
+                     "name" : "rl_shift",
                      "value" : 2
                   }
-               ]
+               ],
+               "from" : {
+                  "key_code" : "k"
+               },
+               "type" : "basic"
             }
-         ],
-         "description" : "Right-Left shift long press + k to Karabiner-Elements"
+         ]
       },
       {
-         "description" : "Right-Left shift long press + p to Preview",
          "manipulators" : [
             {
+               "conditions" : [
+                  {
+                     "type" : "variable_if",
+                     "name" : "rl_shift",
+                     "value" : 2
+                  }
+               ],
                "from" : {
                   "key_code" : "p"
                },
+               "type" : "basic",
                "to" : [
                   {
                      "set_notification_message" : {
@@ -86,13 +94,6 @@
                      "shell_command" : "/Users/steve/bin/master.sh 'Preview'"
                   }
                ],
-               "conditions" : [
-                  {
-                     "type" : "variable_if",
-                     "value" : 2,
-                     "name" : "rl_shift"
-                  }
-               ],
                "to_after_key_up" : [
                   {
                      "set_variable" : {
@@ -100,11 +101,10 @@
                         "name" : "rl_shift"
                      }
                   }
-               ],
-               "type" : "basic"
+               ]
             }
-         ]
+         ],
+         "description" : "Right-Left shift long press + p to Preview"
       }
-   ],
-   "title" : "App Activators - Right-Left Shift Sequence Triggers"
+   ]
 }

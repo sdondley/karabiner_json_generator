@@ -81,7 +81,7 @@ sub process_templates {
         # Write formatted JSON to output file
         open(my $fh, '>', $output_file)
             or croak "Cannot open output file $output_file: $!\n";
-        print $fh JSON->new->pretty->encode($json_obj);
+        print $fh JSON->new->pretty->canonical->encode($json_obj);
         close($fh);
 
         push @generated_files, $output_file;

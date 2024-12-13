@@ -3,28 +3,28 @@
       {
          "manipulators" : [
             {
+               "from" : {
+                  "key_code" : "f"
+               },
+               "type" : "basic",
                "conditions" : [
                   {
                      "type" : "variable_if",
-                     "value" : 1,
-                     "name" : "lr_shift"
+                     "name" : "lr_shift",
+                     "value" : 1
+                  }
+               ],
+               "to" : [
+                  {
+                     "shell_command" : "/Users/steve/bin/master.sh 'Finder'"
                   }
                ],
                "to_after_key_up" : [
                   {
                      "set_variable" : {
-                        "name" : "lr_shift",
-                        "value" : 0
+                        "value" : 0,
+                        "name" : "lr_shift"
                      }
-                  }
-               ],
-               "type" : "basic",
-               "from" : {
-                  "key_code" : "f"
-               },
-               "to" : [
-                  {
-                     "shell_command" : "/Users/steve/bin/master.sh 'Finder'"
                   }
                ]
             }
@@ -32,80 +32,76 @@
          "description" : "Left-Right shift quick press + f to Finder"
       },
       {
+         "description" : "Left-Right shift quick press + i to iTerm",
          "manipulators" : [
             {
                "from" : {
                   "key_code" : "i"
                },
+               "type" : "basic",
+               "conditions" : [
+                  {
+                     "value" : 1,
+                     "name" : "lr_shift",
+                     "type" : "variable_if"
+                  }
+               ],
                "to" : [
                   {
                      "shell_command" : "/Users/steve/bin/master.sh 'iTerm'"
                   }
                ],
-               "type" : "basic",
                "to_after_key_up" : [
                   {
                      "set_variable" : {
-                        "name" : "lr_shift",
-                        "value" : 0
+                        "value" : 0,
+                        "name" : "lr_shift"
                      }
-                  }
-               ],
-               "conditions" : [
-                  {
-                     "value" : 1,
-                     "type" : "variable_if",
-                     "name" : "lr_shift"
-                  }
-               ]
-            }
-         ],
-         "description" : "Left-Right shift quick press + i to iTerm"
-      },
-      {
-         "description" : "Left-Right shift long press + s to System Settings",
-         "manipulators" : [
-            {
-               "type" : "basic",
-               "conditions" : [
-                  {
-                     "value" : 2,
-                     "type" : "variable_if",
-                     "name" : "lr_shift"
-                  }
-               ],
-               "to_after_key_up" : [
-                  {
-                     "set_variable" : {
-                        "name" : "lr_shift",
-                        "value" : 0
-                     }
-                  }
-               ],
-               "from" : {
-                  "key_code" : "s"
-               },
-               "to" : [
-                  {
-                     "set_notification_message" : {
-                        "id" : "org.pqrs.long_lr_shift",
-                        "text" : ""
-                     }
-                  },
-                  {
-                     "shell_command" : "/Users/steve/bin/master.sh 'System Settings'"
                   }
                ]
             }
          ]
       },
       {
-         "description" : "Left-Right shift long press + a to Activity Monitor",
          "manipulators" : [
             {
+               "to" : [
+                  {
+                     "set_notification_message" : {
+                        "text" : "",
+                        "id" : "org.pqrs.long_lr_shift"
+                     }
+                  },
+                  {
+                     "shell_command" : "/Users/steve/bin/master.sh 'System Settings'"
+                  }
+               ],
+               "to_after_key_up" : [
+                  {
+                     "set_variable" : {
+                        "name" : "lr_shift",
+                        "value" : 0
+                     }
+                  }
+               ],
+               "conditions" : [
+                  {
+                     "value" : 2,
+                     "name" : "lr_shift",
+                     "type" : "variable_if"
+                  }
+               ],
                "from" : {
-                  "key_code" : "a"
+                  "key_code" : "s"
                },
+               "type" : "basic"
+            }
+         ],
+         "description" : "Left-Right shift long press + s to System Settings"
+      },
+      {
+         "manipulators" : [
+            {
                "to" : [
                   {
                      "set_notification_message" : {
@@ -120,21 +116,25 @@
                "to_after_key_up" : [
                   {
                      "set_variable" : {
-                        "name" : "lr_shift",
-                        "value" : 0
+                        "value" : 0,
+                        "name" : "lr_shift"
                      }
                   }
                ],
+               "from" : {
+                  "key_code" : "a"
+               },
+               "type" : "basic",
                "conditions" : [
                   {
-                     "type" : "variable_if",
                      "value" : 2,
-                     "name" : "lr_shift"
+                     "name" : "lr_shift",
+                     "type" : "variable_if"
                   }
-               ],
-               "type" : "basic"
+               ]
             }
-         ]
+         ],
+         "description" : "Left-Right shift long press + a to Activity Monitor"
       }
    ],
    "title" : "App Activators - Left-Right Shift Sequence Triggers"
