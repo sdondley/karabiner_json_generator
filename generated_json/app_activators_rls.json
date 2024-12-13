@@ -1,0 +1,110 @@
+{
+   "rules" : [
+      {
+         "description" : "Right-Left shift quick press + d to Discord",
+         "manipulators" : [
+            {
+               "to" : [
+                  {
+                     "shell_command" : "/Users/steve/bin/master.sh 'Discord'"
+                  }
+               ],
+               "type" : "basic",
+               "to_after_key_up" : [
+                  {
+                     "set_variable" : {
+                        "name" : "rl_shift",
+                        "value" : 0
+                     }
+                  }
+               ],
+               "from" : {
+                  "key_code" : "d"
+               },
+               "conditions" : [
+                  {
+                     "name" : "rl_shift",
+                     "type" : "variable_if",
+                     "value" : 1
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "manipulators" : [
+            {
+               "type" : "basic",
+               "to_after_key_up" : [
+                  {
+                     "set_variable" : {
+                        "name" : "rl_shift",
+                        "value" : 0
+                     }
+                  }
+               ],
+               "from" : {
+                  "key_code" : "k"
+               },
+               "conditions" : [
+                  {
+                     "name" : "rl_shift",
+                     "value" : 2,
+                     "type" : "variable_if"
+                  }
+               ],
+               "to" : [
+                  {
+                     "set_notification_message" : {
+                        "text" : "",
+                        "id" : "org.pqrs.long_rl_shift"
+                     }
+                  },
+                  {
+                     "shell_command" : "/Users/steve/bin/master.sh 'Karabiner-Elements'"
+                  }
+               ]
+            }
+         ],
+         "description" : "Right-Left shift long press + k to Karabiner-Elements"
+      },
+      {
+         "manipulators" : [
+            {
+               "to" : [
+                  {
+                     "set_notification_message" : {
+                        "text" : "",
+                        "id" : "org.pqrs.long_rl_shift"
+                     }
+                  },
+                  {
+                     "shell_command" : "/Users/steve/bin/master.sh 'Preview'"
+                  }
+               ],
+               "type" : "basic",
+               "to_after_key_up" : [
+                  {
+                     "set_variable" : {
+                        "value" : 0,
+                        "name" : "rl_shift"
+                     }
+                  }
+               ],
+               "conditions" : [
+                  {
+                     "type" : "variable_if",
+                     "value" : 2,
+                     "name" : "rl_shift"
+                  }
+               ],
+               "from" : {
+                  "key_code" : "p"
+               }
+            }
+         ],
+         "description" : "Right-Left shift long press + p to Preview"
+      }
+   ],
+   "title" : "App Activators - Right-Left Shift Sequence Triggers"
+}

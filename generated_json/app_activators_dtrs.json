@@ -3,23 +3,23 @@
       {
          "manipulators" : [
             {
-               "conditions" : [
-                  {
-                     "name" : "double_tap_rshift",
-                     "value" : 2,
-                     "type" : "variable_if"
-                  }
-               ],
                "type" : "basic",
-               "from" : {
-                  "key_code" : "s"
-               },
                "to_after_key_up" : [
                   {
                      "set_variable" : {
-                        "value" : 0,
-                        "name" : "double_tap_rshift"
+                        "name" : "double_tap_rshift",
+                        "value" : 0
                      }
+                  }
+               ],
+               "from" : {
+                  "key_code" : "s"
+               },
+               "conditions" : [
+                  {
+                     "value" : 2,
+                     "type" : "variable_if",
+                     "name" : "double_tap_rshift"
                   }
                ],
                "to" : [
