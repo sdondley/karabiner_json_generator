@@ -1,1 +1,6 @@
-{"title":"App Activators - Right-Left Shift Sequence Triggers","rules":[{"description":"Right-Left shift quick press + d to Discord","manipulators":[{"type":"basic","conditions":[{"type":"variable_if","name":"rl_shift","value":1}],"from":{"key_code":"d"},"to":[{"shell_command":"/Users/steve/bin/master.sh 'Discord'"}],"to_after_key_up":[{"set_variable":{"name":"rl_shift","value":0}}]}]},{"description":"Right-Left shift long press + k to Karabiner-Elements","manipulators":[{"type":"basic","conditions":[{"type":"variable_if","name":"rl_shift","value":2}],"from":{"key_code":"k"},"to":[{"set_notification_message":{"id":"org.pqrs.long_rl_shift","text":""}},{"shell_command":"/Users/steve/bin/master.sh 'Karabiner-Elements'"}],"to_after_key_up":[{"set_variable":{"name":"rl_shift","value":0}}]}]},{"description":"Right-Left shift long press + p to Preview","manipulators":[{"type":"basic","conditions":[{"type":"variable_if","name":"rl_shift","value":2}],"from":{"key_code":"p"},"to":[{"set_notification_message":{"id":"org.pqrs.long_rl_shift","text":""}},{"shell_command":"/Users/steve/bin/master.sh 'Preview'"}],"to_after_key_up":[{"set_variable":{"name":"rl_shift","value":0}}]}]}]}
+{
+  "title": "App Activators - Right-Left Shift Sequence Triggers",
+  "rules": [
+
+  ]
+}

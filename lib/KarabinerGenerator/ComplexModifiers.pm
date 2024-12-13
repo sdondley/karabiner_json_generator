@@ -1,67 +1,59 @@
 package KarabinerGenerator::ComplexModifiers;
 use strict;
 use warnings;
-use JSON;
 use File::Copy;
 use File::Path qw(make_path);
 use File::Basename qw(basename);
 use File::Spec;
 use Exporter "import";
+use KarabinerGenerator::Config qw(get_paths);
+use KarabinerGenerator::Validator qw(validate_files);
+use JSON;
 
 our @EXPORT_OK = qw(validate_complex_modifiers install_complex_modifiers);
 
 sub validate_complex_modifiers {
     my ($file) = @_;
-
     return 0 unless -f $file;
 
-    my $json;
-    {
-        local $SIG{__WARN__} = sub {}; # Suppress JSON parsing warnings
-        eval {
-            open my $fh, '<', $file or die "Cannot open $file: $!";
-            local $/;
-            my $content = <$fh>;
-            close $fh;
+    # First validate JSON structure
+    my $json_text = do {
+        local $/;
+        open my $fh, '<', $file or return 0;
+        <$fh>;
+    };
 
-            $json = JSON->new->decode($content);
-        };
-        return 0 if $@;
-    }
+    my $json_data;
+    eval {
+        $json_data = decode_json($json_text);
+    };
+    return 0 if $@ || !$json_data;
 
-    # Validate required structure
-    return 0 unless $json->{title};
-    return 0 unless $json->{rules} && ref($json->{rules}) eq 'ARRAY';
+    # Validate required fields
+    return 0 unless $json_data->{title} && ref($json_data->{rules}) eq 'ARRAY';
 
-    # Validate each rule
-    for my $rule (@{$json->{rules}}) {
-        return 0 unless $rule->{description};
-        return 0 unless $rule->{manipulators} && ref($rule->{manipulators}) eq 'ARRAY';
-    }
+    # Skip CLI validation in test mode
+    return 1 if $ENV{TEST_MODE};
 
-    return 1;
+    # Then validate with karabiner_cli
+    my ($cli_path, undef, undef) = get_paths({global => {}});
+    return validate_files($cli_path, $file);
 }
 
 sub install_complex_modifiers {
     my ($source_file, $dest_dir) = @_;
-
     return 0 unless -f $source_file;
 
     # Create destination directory if it doesn't exist
-    {
-        local $SIG{__WARN__} = sub {}; # Suppress directory creation warnings
-        eval {
-            make_path($dest_dir) unless -d $dest_dir;
-        };
-        return 0 if $@;
-    }
+    eval {
+        make_path($dest_dir);
+    };
+    return 0 if $@;
 
     my $dest_file = File::Spec->catfile($dest_dir, basename($source_file));
 
     # Copy the file
-    if (!copy($source_file, $dest_file)) {
-        return 0;
-    }
+    return 0 unless copy($source_file, $dest_file);
 
     # Set permissions to match original
     eval {

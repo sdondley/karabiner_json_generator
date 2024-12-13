@@ -4,34 +4,34 @@ app_activators:
   modifiers:
     double_tap_rshift:
       apps:
+        - trigger_key: "a"
+          app_name: "Activity Monitor"
         - trigger_key: "s"
           app_name: "Safari"
+        - trigger_key: "d"
+          app_name: "Discord"
+        - trigger_key: "f"
+          app_name: "Finder"
     
     double_tap_lshift:
       apps:
+        - trigger_key: "i"
+          app_name: "iTerm"
         - trigger_key: "m"
           app_name: "Mail"
         - trigger_key: "n"
           app_name: "Notes"
-    
-    lr_shift:
-      quick_press:
-        - trigger_key: "f"
-          app_name: "Finder"
-        - trigger_key: "i"
-          app_name: "iTerm"
-      long_press:
-        - trigger_key: "s"
-          app_name: "System Settings"
-        - trigger_key: "a"
-          app_name: "Activity Monitor"
-    
-    rl_shift:
-      quick_press:
-        - trigger_key: "d"
-          app_name: "Discord"
-      long_press:
         - trigger_key: "k"
           app_name: "Karabiner-Elements"
         - trigger_key: "p"
           app_name: "Preview"
+    
+    lr_shift:
+      quick_press:
+        - trigger_key: "s"
+          app_name: "System Settings"
+#      #long_press:
+#    
+#    rl_shift:
+#      quick_press:
+#      long_press:

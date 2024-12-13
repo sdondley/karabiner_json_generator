@@ -21,15 +21,18 @@ might do for you, read on.
 * A global configuration YAML file for setting up paths and global options
 * A sample config YAML file with app-specific configurations. If you want to use
   it, you'll probably want to change it first.
-* An app_activators.json sample file in the generated json directory, generated
-  by the json_generator.pl script. Notes that if you install it, it will not
-  work on your machine.
-* The template file for the app_activators.json.tpl file in the `templates`
-  directory. You'll definitely need to change this before generating new JSON
-  files with it.
+* Four generated JSON files in the generated json directory:
+  - **app_activators_dtls.json**: Double tap left shift triggers
+  - **app_activators_dtrs.json**: Double tap right shift triggers
+  - **app_activators_lrs.json**: Left-right shift sequence triggers
+  - **app_activators_rls.json**: Right-left shift sequence triggers
+* Four corresponding template files in the `templates` directory:
+  - **app_activators_dtls.json.tpl**: Template for double tap left shift
+  - **app_activators_dtrs.json.tpl**: Template for double tap right shift
+  - **app_activators_lrs.json.tpl**: Template for left-right shift sequence
+  - **app_activators_rls.json.tpl**: Template for right-left shift sequence
 * Test files in the `t/` directory ensuring code reliability
 * This README file
-
 ## Big Picture Overview
 
 ### Complex Modifiers™️ Ruleset: What is it?

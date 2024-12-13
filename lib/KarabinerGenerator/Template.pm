@@ -39,17 +39,23 @@ sub _ordered_keys {
 }
 
 sub _ordered_encode {
-    my ($data) = @_;
+    my ($data, $indent_level) = @_;
+    $indent_level //= 0;
+    my $indent = "  " x $indent_level;
+    my $next_indent = "  " x ($indent_level + 1);
 
     if (ref $data eq 'HASH') {
-        return '{' . join(',',
+        return "{\n" . join(",\n",
             map {
-                JSON::encode_json("$_") . ':' . _ordered_encode($data->{$_})
+                $next_indent . JSON::encode_json("$_") . ': ' .
+                _ordered_encode($data->{$_}, $indent_level + 1)
             } _ordered_keys($data)
-        ) . '}';
+        ) . "\n$indent}";
     }
     elsif (ref $data eq 'ARRAY') {
-        return '[' . join(',', map { _ordered_encode($_) } @$data) . ']';
+        return "[\n" . join(",\n",
+            map { $next_indent . _ordered_encode($_, $indent_level + 1) } @$data
+        ) . "\n$indent]";
     }
     else {
         return JSON::encode_json($data);
@@ -113,7 +119,7 @@ sub process_templates {
         # Write ordered JSON to output file
         open(my $fh, '>', $output_file)
             or croak "Cannot open output file $output_file: $!\n";
-        print $fh _ordered_encode($json_obj);
+        print $fh _ordered_encode($json_obj);  # Now includes proper indentation
         close($fh);
 
         push @generated_files, $output_file;

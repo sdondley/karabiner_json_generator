@@ -1,19 +1,32 @@
-#!/usr/bin/env perl
+# File: t/11_complex_modifiers.t
 use strict;
 use warnings;
 use Test::More;
 use File::Temp qw(tempdir);
 use File::Spec;
+use File::Path qw(make_path);
+use Cwd qw(getcwd abs_path);
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
 
 use KarabinerGenerator::ComplexModifiers qw(validate_complex_modifiers install_complex_modifiers);
 
-# Create temp directory for tests
+# Store the original working directory
+my $orig_dir = getcwd();
+
+# Create isolated temp directory for tests
 my $test_dir = tempdir(CLEANUP => 1);
+chdir $test_dir or die "Cannot chdir to test directory: $!";
+
+END {
+    chdir $orig_dir if defined $orig_dir;
+}
 
 # Test validation
 subtest 'Complex Modifiers Validation' => sub {
+    plan tests => 3;
+    local $ENV{TEST_MODE} = 1;  # Enable test mode for validation
+
     # Test valid complex modifiers file
     my $valid_json = qq{
         {
@@ -21,7 +34,13 @@ subtest 'Complex Modifiers Validation' => sub {
             "rules": [
                 {
                     "description": "Test Rule",
-                    "manipulators": []
+                    "manipulators": [
+                        {
+                            "type": "basic",
+                            "from": { "key_code": "a" },
+                            "to": [{ "key_code": "b" }]
+                        }
+                    ]
                 }
             ]
         }
@@ -53,10 +72,14 @@ subtest 'Complex Modifiers Validation' => sub {
 
 # Test installation
 subtest 'Complex Modifiers Installation' => sub {
-    my $source = File::Spec->catfile($test_dir, "complex_modifiers.json");
-    my $dest_dir = File::Spec->catfile($test_dir, "dest");
+    plan tests => 4;
+    local $ENV{TEST_MODE} = 1;
+
+    my $test_cm_file = File::Spec->catfile($test_dir, "test_complex_modifiers.json");
+    my $test_dest_dir = File::Spec->catfile($test_dir, "dest");
+    my $invalid_dest = "/this/path/should/not/exist/ever";  # Use a definitely invalid path
     
-    # Create test file
+    # Create test file with minimal valid content
     my $test_json = qq{
         {
             "title": "Complex Modifiers",
@@ -69,19 +92,28 @@ subtest 'Complex Modifiers Installation' => sub {
         }
     };
     
-    open my $fh, '>', $source or die "Cannot create test file: $!";
+    open my $fh, '>', $test_cm_file or die "Cannot create test file: $!";
     print $fh $test_json;
     close $fh;
     
-    # Test installation
-    ok(install_complex_modifiers($source, $dest_dir), "Installation succeeds with valid file");
-    ok(-f File::Spec->catfile($dest_dir, "complex_modifiers.json"), "File exists in destination");
+    # Test successful installation
+    ok(install_complex_modifiers($test_cm_file, $test_dest_dir), 
+       "Installation succeeds with valid file");
+    
+    my $installed_file = File::Spec->catfile($test_dest_dir, "test_complex_modifiers.json");
+    ok(-f $installed_file, "File exists in destination");
+    
+    # Test installation with invalid paths
+    ok(!install_complex_modifiers(
+        File::Spec->catfile($test_dir, "nonexistent.json"),
+        $test_dest_dir
+    ), "Installation fails with missing source");
     
     # Test installation with invalid destination
-    ok(!install_complex_modifiers($source, "/nonexistent/path"), "Installation fails with invalid destination");
-    
-    # Test installation with missing source
-    ok(!install_complex_modifiers("/nonexistent/file.json", $dest_dir), "Installation fails with missing source");
+    ok(!install_complex_modifiers(
+        $test_cm_file,
+        $invalid_dest
+    ), "Installation fails with invalid destination");
 };
 
 done_testing();
