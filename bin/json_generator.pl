@@ -36,6 +36,7 @@ use KarabinerGenerator::Terminal qw(detect_capabilities fmt_print);
 use KarabinerGenerator::Template qw(process_templates);
 use KarabinerGenerator::Validator qw(validate_files);
 use KarabinerGenerator::Installer qw(install_files);
+use KarabinerGenerator::ComplexModifiers qw(validate_complex_modifiers install_complex_modifiers);
 
 # Command line options
 my %opts = (
@@ -117,10 +118,14 @@ foreach my $file (@generated_files) {
     print fmt_print("ok", 'success'), "\n" unless $opts{quiet};
 }
 
-# Check complex_modifiers if it exists
+# Validate complex_modifiers.json separately
 if (-f "complex_modifiers.json") {
     print fmt_print("Checking complex_modifiers.json... ", 'info') unless $opts{quiet};
-    print fmt_print("ok", 'success'), "\n" unless $opts{quiet};
+    if (validate_complex_modifiers("complex_modifiers.json")) {
+        print fmt_print("ok", 'success'), "\n" unless $opts{quiet};
+    } else {
+        die fmt_print("complex_modifiers.json validation failed", 'error'), "\n";
+    }
 }
 
 print fmt_print("All validations passed", 'success'), "\n" unless $opts{quiet};
@@ -131,6 +136,9 @@ if ($opts{install}) {
     print fmt_print("Installing files...", 'info'), "\n" unless $opts{quiet};
     eval {
         install_files($complex_mods_dir, @generated_files);
+        if (-f "complex_modifiers.json") {
+            install_complex_modifiers("complex_modifiers.json", $complex_mods_dir);
+        }
     };
     if ($@) {
         die fmt_print("Installation failed: $@", 'error'), "\n";
@@ -144,6 +152,9 @@ if ($opts{install}) {
         print fmt_print("Installing files...", 'info'), "\n";
         eval {
             install_files($complex_mods_dir, @generated_files);
+            if (-f "complex_modifiers.json") {
+                install_complex_modifiers("complex_modifiers.json", $complex_mods_dir);
+            }
         };
         if ($@) {
             die fmt_print("Installation failed: $@", 'error'), "\n";

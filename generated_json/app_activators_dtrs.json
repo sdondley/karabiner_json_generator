@@ -1,25 +1,24 @@
 {
-   "title" : "App Activators - Double Tap Right Shift Triggers",
    "rules" : [
       {
-         "description" : "Double tap left shift-s to Safari",
          "manipulators" : [
             {
                "conditions" : [
                   {
-                     "value" : 2,
                      "name" : "double_tap_rshift",
+                     "value" : 2,
                      "type" : "variable_if"
                   }
                ],
+               "type" : "basic",
                "from" : {
                   "key_code" : "s"
                },
                "to_after_key_up" : [
                   {
                      "set_variable" : {
-                        "name" : "double_tap_rshift",
-                        "value" : 0
+                        "value" : 0,
+                        "name" : "double_tap_rshift"
                      }
                   }
                ],
@@ -27,10 +26,11 @@
                   {
                      "shell_command" : "/Users/steve/bin/master.sh 'Safari'"
                   }
-               ],
-               "type" : "basic"
+               ]
             }
-         ]
+         ],
+         "description" : "Double tap left shift-s to Safari"
       }
-   ]
+   ],
+   "title" : "App Activators - Double Tap Right Shift Triggers"
 }
