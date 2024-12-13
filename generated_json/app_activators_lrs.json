@@ -1,19 +1,20 @@
 {
-   "title" : "App Activators - Left-Right Shift Sequence Triggers",
    "rules" : [
       {
          "manipulators" : [
             {
-               "to" : [
+               "conditions" : [
                   {
-                     "shell_command" : "/Users/steve/bin/master.sh 'Finder'"
+                     "type" : "variable_if",
+                     "value" : 1,
+                     "name" : "lr_shift"
                   }
                ],
                "to_after_key_up" : [
                   {
                      "set_variable" : {
-                        "value" : 0,
-                        "name" : "lr_shift"
+                        "name" : "lr_shift",
+                        "value" : 0
                      }
                   }
                ],
@@ -21,11 +22,9 @@
                "from" : {
                   "key_code" : "f"
                },
-               "conditions" : [
+               "to" : [
                   {
-                     "value" : 1,
-                     "type" : "variable_if",
-                     "name" : "lr_shift"
+                     "shell_command" : "/Users/steve/bin/master.sh 'Finder'"
                   }
                ]
             }
@@ -33,19 +32,16 @@
          "description" : "Left-Right shift quick press + f to Finder"
       },
       {
-         "description" : "Left-Right shift quick press + i to iTerm",
          "manipulators" : [
             {
-               "conditions" : [
-                  {
-                     "type" : "variable_if",
-                     "value" : 1,
-                     "name" : "lr_shift"
-                  }
-               ],
                "from" : {
                   "key_code" : "i"
                },
+               "to" : [
+                  {
+                     "shell_command" : "/Users/steve/bin/master.sh 'iTerm'"
+                  }
+               ],
                "type" : "basic",
                "to_after_key_up" : [
                   {
@@ -55,32 +51,35 @@
                      }
                   }
                ],
-               "to" : [
+               "conditions" : [
                   {
-                     "shell_command" : "/Users/steve/bin/master.sh 'iTerm'"
+                     "value" : 1,
+                     "type" : "variable_if",
+                     "name" : "lr_shift"
                   }
                ]
             }
-         ]
+         ],
+         "description" : "Left-Right shift quick press + i to iTerm"
       },
       {
          "description" : "Left-Right shift long press + s to System Settings",
          "manipulators" : [
             {
-               "to_after_key_up" : [
-                  {
-                     "set_variable" : {
-                        "value" : 0,
-                        "name" : "lr_shift"
-                     }
-                  }
-               ],
                "type" : "basic",
                "conditions" : [
                   {
-                     "name" : "lr_shift",
+                     "value" : 2,
                      "type" : "variable_if",
-                     "value" : 2
+                     "name" : "lr_shift"
+                  }
+               ],
+               "to_after_key_up" : [
+                  {
+                     "set_variable" : {
+                        "name" : "lr_shift",
+                        "value" : 0
+                     }
                   }
                ],
                "from" : {
@@ -89,8 +88,8 @@
                "to" : [
                   {
                      "set_notification_message" : {
-                        "text" : "",
-                        "id" : "org.pqrs.long_lr_shift"
+                        "id" : "org.pqrs.long_lr_shift",
+                        "text" : ""
                      }
                   },
                   {
@@ -107,35 +106,36 @@
                "from" : {
                   "key_code" : "a"
                },
-               "conditions" : [
-                  {
-                     "name" : "lr_shift",
-                     "type" : "variable_if",
-                     "value" : 2
-                  }
-               ],
-               "to_after_key_up" : [
-                  {
-                     "set_variable" : {
-                        "value" : 0,
-                        "name" : "lr_shift"
-                     }
-                  }
-               ],
-               "type" : "basic",
                "to" : [
                   {
                      "set_notification_message" : {
-                        "id" : "org.pqrs.long_lr_shift",
-                        "text" : ""
+                        "text" : "",
+                        "id" : "org.pqrs.long_lr_shift"
                      }
                   },
                   {
                      "shell_command" : "/Users/steve/bin/master.sh 'Activity Monitor'"
                   }
-               ]
+               ],
+               "to_after_key_up" : [
+                  {
+                     "set_variable" : {
+                        "name" : "lr_shift",
+                        "value" : 0
+                     }
+                  }
+               ],
+               "conditions" : [
+                  {
+                     "type" : "variable_if",
+                     "value" : 2,
+                     "name" : "lr_shift"
+                  }
+               ],
+               "type" : "basic"
             }
          ]
       }
-   ]
+   ],
+   "title" : "App Activators - Left-Right Shift Sequence Triggers"
 }

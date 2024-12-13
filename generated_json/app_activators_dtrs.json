@@ -3,30 +3,30 @@
       {
          "manipulators" : [
             {
-               "type" : "basic",
-               "to_after_key_up" : [
+               "to" : [
                   {
-                     "set_variable" : {
-                        "name" : "double_tap_rshift",
-                        "value" : 0
-                     }
+                     "shell_command" : "/Users/steve/bin/master.sh 'Safari'"
                   }
                ],
                "from" : {
                   "key_code" : "s"
                },
-               "conditions" : [
+               "to_after_key_up" : [
                   {
-                     "value" : 2,
-                     "type" : "variable_if",
-                     "name" : "double_tap_rshift"
+                     "set_variable" : {
+                        "value" : 0,
+                        "name" : "double_tap_rshift"
+                     }
                   }
                ],
-               "to" : [
+               "conditions" : [
                   {
-                     "shell_command" : "/Users/steve/bin/master.sh 'Safari'"
+                     "name" : "double_tap_rshift",
+                     "type" : "variable_if",
+                     "value" : 2
                   }
-               ]
+               ],
+               "type" : "basic"
             }
          ],
          "description" : "Double tap left shift-s to Safari"
