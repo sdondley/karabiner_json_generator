@@ -1,0 +1,67 @@
+{
+   "rules" : [
+      {
+         "manipulators" : [
+            {
+               "to" : [
+                  {
+                     "shell_command" : "/Users/steve/bin/master.sh 'Mail'"
+                  }
+               ],
+               "type" : "basic",
+               "to_after_key_up" : [
+                  {
+                     "set_variable" : {
+                        "value" : 0,
+                        "name" : "double_tap_lshift"
+                     }
+                  }
+               ],
+               "from" : {
+                  "key_code" : "m"
+               },
+               "conditions" : [
+                  {
+                     "name" : "double_tap_lshift",
+                     "type" : "variable_if",
+                     "value" : 2
+                  }
+               ]
+            }
+         ],
+         "description" : "Double tap left shift-m to Mail"
+      },
+      {
+         "description" : "Double tap left shift-n to Notes",
+         "manipulators" : [
+            {
+               "to_after_key_up" : [
+                  {
+                     "set_variable" : {
+                        "value" : 0,
+                        "name" : "double_tap_lshift"
+                     }
+                  }
+               ],
+               "type" : "basic",
+               "to" : [
+                  {
+                     "shell_command" : "/Users/steve/bin/master.sh 'Notes'"
+                  }
+               ],
+               "from" : {
+                  "key_code" : "n"
+               },
+               "conditions" : [
+                  {
+                     "type" : "variable_if",
+                     "name" : "double_tap_lshift",
+                     "value" : 2
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "title" : "App Activators - Double Tap Left Shift Triggers"
+}
