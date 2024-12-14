@@ -8,6 +8,7 @@ use File::Basename qw(basename fileparse);
 use File::Spec;
 use Carp qw(croak);
 use Data::Dumper;
+use KarabinerGenerator::Terminal qw(fmt_print);  # Add this import
 use Exporter "import";
 
 our @EXPORT_OK = qw(process_templates);
@@ -150,6 +151,8 @@ sub process_templates {
             or croak "Cannot open output file $output_file: $!\n";
         print $fh _ordered_encode($json_obj);
         close($fh);
+
+        print fmt_print("Generated $output_file", 'success'), "\n" unless $ENV{TEST_MODE} || $ENV{QUIET};
 
         push @generated_files, $output_file;
     }

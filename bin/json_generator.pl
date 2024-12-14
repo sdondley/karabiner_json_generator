@@ -90,10 +90,9 @@ if ($opts{debug}) {
     print "Emoji support: ", ($has_emoji ? "yes" : "no"), "\n\n";
 }
 
-print fmt_print("Starting JSON generation process...", 'info'), "\n" unless $opts{quiet};
+print fmt_print("Starting JSON generation process...", 'info'), "\n\n" unless $opts{quiet};
 
-my $template_file = "app_activators_dtls.json.tpl";
-print fmt_print("Processing template: $template_file", 'info'), "\n" unless $opts{quiet};
+print fmt_print("Generating JSON files from templates...", 'info'), "\n" unless $opts{quiet};
 
 my @generated_files;
 {
@@ -117,31 +116,23 @@ my @generated_files;
     }
 }
 
-foreach my $file (@generated_files) {
-    print fmt_print("Generated $file", 'success'), "\n" unless $opts{quiet};
-}
 
-print fmt_print("Validating files...", 'info'), "\n" unless $opts{quiet};
+my ($cli_path, undef, $complex_mods_dir) = get_paths({global => {}});
+
+print "\n" unless $opts{quiet};
+print fmt_print("Validating JSON files...", 'info'), "\n" unless $opts{quiet};
 
 # Validate generated files
-foreach my $file (@generated_files) {
-    print fmt_print("Checking $file... ", 'info') unless $opts{quiet};
-    print fmt_print("ok", 'success'), "\n" unless $opts{quiet};
+unless (validate_files($cli_path, @generated_files)) {
+    die fmt_print("File validation failed", 'error'), "\n";
 }
 
 # Validate complex_modifiers.json separately
 if (-f "complex_modifiers.json") {
-    print fmt_print("Checking complex_modifiers.json... ", 'info') unless $opts{quiet};
-    if (validate_complex_modifiers("complex_modifiers.json")) {
-        print fmt_print("ok", 'success'), "\n" unless $opts{quiet};
-    } else {
+    if (!validate_complex_modifiers("complex_modifiers.json")) {
         die fmt_print("complex_modifiers.json validation failed", 'error'), "\n";
     }
 }
-
-print fmt_print("All validations passed", 'success'), "\n" unless $opts{quiet};
-
-my (undef, undef, $complex_mods_dir) = get_paths({global => {}});
 
 if ($opts{install}) {
     print fmt_print("Installing files...", 'info'), "\n" unless $opts{quiet};

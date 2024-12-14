@@ -10,7 +10,12 @@ our @EXPORT_OK = qw(load_config get_paths validate_config);
 sub load_config {
     my ($config_file) = @_;
     my $config = eval { LoadFile($config_file) } || {};
-    my $global_config = eval { LoadFile("global_config.yaml") } || {};
+
+    # Get the directory of the main config file
+    my $config_dir = File::Basename::dirname($config_file);
+    my $global_config_path = File::Spec->catfile($config_dir, "global_config.yaml");
+
+    my $global_config = eval { LoadFile($global_config_path) } || {};
 
     $config->{global} = $global_config;
     return $config;

@@ -1,0 +1,21 @@
+{
+  "title": "Malformed Complex Modification"
+  "rules": [  # Missing comma
+    {
+      "description": "Invalid JSON syntax"
+      "manipulators": [  # Missing comma
+        {
+          "type": "basic"
+          "from": {  # Missing comma
+            "key_code": "a"
+          },
+          "to": [
+            {
+              "key_code": "b"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

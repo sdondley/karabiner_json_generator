@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+# File: t/09_cli_output.t
 use strict;
 use warnings;
 use Test::More;
@@ -15,7 +15,6 @@ use IO::Pty;
 
 # Verify scripts exist before starting tests
 my $script = File::Spec->catfile($RealBin, '..', 'bin', 'json_generator.pl');
-
 plan skip_all => "Script not found at $script" unless -f $script;
 
 # Make script executable
@@ -102,13 +101,16 @@ sub setup_test_env {
     print $gf "karabiner:\n  config_dir: \"$temp_dir/config\"\n";
     close $gf;
     
-    # Create template
-    open my $tf, '>', File::Spec->catfile($template_dir, 'app_activators_dtls.json.tpl') or die $!;
-    print $tf '{"title":"[% title %]","rules":[]}';
-    close $tf;
+    # Create templates
+    for my $template_name (qw(dtls dtrs lrs rls)) {
+        my $template_file = File::Spec->catfile($template_dir, "app_activators_${template_name}.json.tpl");
+        open my $tf, '>', $template_file or die $!;
+        print $tf '{"title":"[% title %]","rules":[]}';
+        close $tf;
+    }
     
     # Create complex_modifiers.json
-    open my $cm, '>', "complex_modifiers.json" or die $!;
+    open my $cm, '>', File::Spec->catfile($temp_dir, "complex_modifiers.json") or die $!;
     print $cm '{"title":"Complex Modifiers","rules":[]}';
     close $cm;
     
@@ -134,27 +136,26 @@ app_activators:
 
     # Check key semantic elements based on actual output
     like($stdout, qr/Starting JSON generation process/i, 'Shows start message');
-    like($stdout, qr/Processing template/i, 'Shows template processing');
-    like($stdout, qr/Validating.*files/i, 'Shows validation step');
-    like($stdout, qr/All validations passed/i, 'Shows validation result');  # Updated to match actual output
+    like($stdout, qr/Generating JSON files from templates/i, 'Shows template processing message');
+    like($stdout, qr/Validating JSON files/i, 'Shows validation step');
+    like($stdout, qr/All files passed validation/i, 'Shows validation result');
     like($stdout, qr/Would you like to install/i, 'Shows install prompt');
     
     # Basic ordering check
     my $start_pos = index($stdout, 'Starting');
-    my $processing_pos = index($stdout, 'Processing');
-    my $validate_pos = index($stdout, 'Validating');
+    my $generating_pos = index($stdout, 'Generating');
+    my $validating_pos = index($stdout, 'Validating');
     my $install_pos = index($stdout, 'install');
     
     ok($start_pos >= 0, 'Start message exists');
-    ok($processing_pos >= 0, 'Processing message exists');
-    ok($validate_pos >= 0, 'Validation message exists');
+    ok($generating_pos >= 0, 'Generating message exists');
+    ok($validating_pos >= 0, 'Validation message exists');
     ok($install_pos >= 0, 'Install message exists');
     
-    ok($start_pos < $processing_pos, 'Processing happens after start');
-    ok($processing_pos < $validate_pos, 'Validation happens after processing');
-    ok($validate_pos < $install_pos, 'Install prompt comes last');
+    ok($start_pos < $generating_pos, 'Generation happens after start');
+    ok($generating_pos < $validating_pos, 'Validation happens after generation');
+    ok($validating_pos < $install_pos, 'Install prompt comes last');
     
-    # Check exit status
     is($output->{exit}, 0, 'Script exits successfully');
 };
 

@@ -1,41 +1,50 @@
 package KarabinerGenerator::Validator;
 use strict;
 use warnings;
+use File::Spec;
 use Exporter "import";
+use KarabinerGenerator::Terminal qw(fmt_print);
 
 our @EXPORT_OK = qw(validate_files);
 
 sub validate_files {
     my ($cli_path, @files) = @_;
-    my $all_valid = 1;
+    my @failed_files;
 
     foreach my $file (@files) {
-        # Skip validation in test mode
-        if ($ENV{TEST_MODE}) {
+        unless (-f $file) {
+            warn "File does not exist: $file" unless $ENV{QUIET};
+            push @failed_files, $file;
             next;
         }
 
-        # Use system() with LIST form to avoid shell interpretation
+        print fmt_print("Validating $file... \n", 'info') unless $ENV{QUIET};
+
+        # Use karabiner_cli to validate
         my $result;
         if ($ENV{QUIET}) {
-            # Redirect both stdout and stderr to null in quiet mode
-            open my $oldout, ">&STDOUT" or die "Can't dup STDOUT: $!";
-            open my $olderr, ">&STDERR" or die "Can't dup STDERR: $!";
-            open STDOUT, '>', File::Spec->devnull() or die "Can't open null: $!";
-            open STDERR, '>', File::Spec->devnull() or die "Can't open null: $!";
-
-            $result = system($cli_path, '--lint-complex-modifications', $file);
-
-            open STDOUT, ">&", $oldout or die "Can't restore STDOUT: $!";
-            open STDERR, ">&", $olderr or die "Can't restore STDERR: $!";
+            $result = system("'$cli_path' --lint-complex-modifications $file >/dev/null 2>&1");
         } else {
-            $result = system($cli_path, '--lint-complex-modifications', $file);
+            $result = system("'$cli_path' --lint-complex-modifications $file >/dev/null");
         }
 
-        $all_valid = 0 if $result != 0;
+        if ($result != 0) {
+            print fmt_print("failed", 'error'), "\n" unless $ENV{QUIET};
+            push @failed_files, $file;
+        }
+        # Remove the extra "ok" print here - karabiner_cli already prints it
     }
 
-    return $all_valid;
+    if (@failed_files) {
+        print fmt_print("Validation failed for: \n", 'error') unless $ENV{QUIET};
+        for my $file (@failed_files) {
+            print fmt_print(" - $file\n", 'error') unless $ENV{QUIET};
+        }
+        return 0;
+    }
+
+    print fmt_print("All files passed validation\n", 'success') unless $ENV{QUIET};
+    return 1;
 }
 
 1;

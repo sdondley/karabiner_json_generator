@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Deep;
 use File::Temp qw(tempdir);
 use File::Path qw(make_path);
 use File::Spec;
@@ -13,6 +14,10 @@ BEGIN { $ENV{TEST_MODE} = 1; }
 
 use KarabinerGenerator::Config qw(load_config);
 use KarabinerGenerator::Template qw(process_templates);
+use KarabinerGenerator::Validator qw(validate_files);
+
+# Plan total number of subtests
+plan tests => 2;
 
 # Create temp test environment with subdirectories
 my $temp_dir = tempdir(CLEANUP => 1);
@@ -64,6 +69,12 @@ app_activators:
         },
         "to": [{
           "shell_command": "[% shell_command %] '[% app.app_name %]'"
+        }],
+        "to_after_key_up": [{
+          "set_variable": {
+            "name": "double_tap_rshift",
+            "value": 0
+          }
         }]
       }]
     }
@@ -77,7 +88,22 @@ app_activators:
     print $template_fh $template_content;
     close $template_fh;
 
-    plan tests => 9;
+    # Count total tests we're running
+    my $base_tests = 5;  # Basic file generation tests
+    my $json_structure_tests = 3;  # Basic JSON structure tests
+    my $rule_count = 2;  # Number of rules we expect
+    my $tests_per_rule = 2;  # Tests for each rule
+    my $tests_per_manipulator = 7;  # Tests for each manipulator
+    my $content_tests = 4;  # Specific content validation tests
+
+    my $total_tests =
+        $base_tests +
+        $json_structure_tests +
+        ($rule_count * $tests_per_rule) +
+        ($rule_count * $tests_per_manipulator) +
+        $content_tests;
+
+    plan tests => $total_tests;
 
     # Load config
     my $config = load_config($config_file);
@@ -90,22 +116,52 @@ app_activators:
     is(scalar @generated_files, 1, 'One file was generated');
     ok(-f $generated_files[0], 'Generated file exists');
 
-    # Validate generated file
+    # Validate generated file structure
     open my $json_fh, '<', $generated_files[0] or die "Cannot read generated file: $!";
     my $json_content = do { local $/; <$json_fh> };
     close $json_fh;
 
     my $data = decode_json($json_content);
 
-    # Structure tests
+    # Basic structure validation
+    ok(exists $data->{title}, 'Has title field');
+    ok(exists $data->{rules}, 'Has rules array');
+    is(ref $data->{rules}, 'ARRAY', 'Rules is an array');
+
+    # Validate each rule and its manipulators
+    foreach my $rule (@{$data->{rules}}) {
+        ok(exists $rule->{description}, 'Rule has description');
+        ok(exists $rule->{manipulators} && ref $rule->{manipulators} eq 'ARRAY',
+           'Rule has manipulators array');
+
+        foreach my $manipulator (@{$rule->{manipulators}}) {
+            is($manipulator->{type}, 'basic', 'Manipulator type is basic');
+            ok(exists $manipulator->{from}{key_code}, 'From has key_code');
+            ok($manipulator->{conditions}[0]{type} eq 'variable_if',
+               'First condition is variable_if');
+            ok(exists $manipulator->{to}[0]{shell_command}, 'To has shell_command');
+            ok(exists $manipulator->{to_after_key_up}[0]{set_variable},
+               'To after key up has set_variable');
+            is($manipulator->{to_after_key_up}[0]{set_variable}{name}, 'double_tap_rshift',
+               'Variable name is correct');
+            is($manipulator->{to_after_key_up}[0]{set_variable}{value}, 0,
+               'Variable value is correct');
+        }
+    }
+
+    # Validate specific content
     is($data->{title}, 'Test App Activators', 'Title was properly templated');
     is(scalar @{$data->{rules}}, 2, 'Generated correct number of rules');
 
     my $safari_rule = $data->{rules}[0];
     my $chrome_rule = $data->{rules}[1];
 
-    like($safari_rule->{manipulators}[0]{to}[0]{shell_command}, qr{/test/path/script\.sh 'Safari'}, 'Safari command correct');
-    like($chrome_rule->{manipulators}[0]{to}[0]{shell_command}, qr{/test/path/script\.sh 'Chrome'}, 'Chrome command correct');
+    like($safari_rule->{manipulators}[0]{to}[0]{shell_command},
+         qr{/test/path/script\.sh 'Safari'},
+         'Safari command correct');
+    like($chrome_rule->{manipulators}[0]{to}[0]{shell_command},
+         qr{/test/path/script\.sh 'Chrome'},
+         'Chrome command correct');
 };
 
 # Test empty modifier handling
@@ -197,5 +253,3 @@ app_activators:
         ok(!-f $empty_file, "Previous file removed when config is empty");
     }
 };
-
-done_testing();
