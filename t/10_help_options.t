@@ -1,7 +1,7 @@
 # File: t/10_help_options.t
 use strict;
 use warnings;
-use Test::More;
+use Test::Most 'die';
 use Capture::Tiny qw(capture);
 use FindBin qw($RealBin);
 use File::Spec;

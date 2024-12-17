@@ -1,33 +1,55 @@
-# File: t/04_validator.t
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More;
+use File::Spec;
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
 
-use KarabinerGenerator::Validator qw(validate_files);
+# Load modules
+use_ok('KarabinerGenerator::Validator', 'validate_files') 
+    or BAIL_OUT("Couldn't load KarabinerGenerator::Validator");
 
-my $KARABINER_CLI = '/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli';
+use KarabinerGenerator::Config qw(get_path mode);
+
+# Ensure we're in test mode
+BEGIN {
+    $ENV{QUIET} = 1;
+}
+
+# Verify we're in test mode
+is(mode(), 'test', 'Running in test mode');
+
+subtest 'Path Verification' => sub {
+    # Verify that the test files exist
+    ok(-f get_path('valid_complex_mod'), 'Valid complex mod fixture exists');
+    ok(-f get_path('invalid_complex_mod'), 'Invalid complex mod fixture exists');
+    ok(-f get_path('malformed_complex_mod'), 'Malformed complex mod fixture exists');
+};
 
 subtest 'File Validation' => sub {
-    plan tests => 4;
+    # Test valid JSON passes
+    ok(validate_files(get_path('valid_complex_mod')), 'Valid JSON passes validation')
+        or diag("Valid JSON validation failed");
 
-    my $fixtures_dir = "$RealBin/fixtures";
+    # Test invalid JSON fails
+    ok(!validate_files(get_path('invalid_complex_mod')), 'Invalid JSON fails validation')
+        or diag("Invalid JSON validation unexpectedly passed");
 
-    my $valid_file = "$fixtures_dir/valid_complex_mod.json";
-    my $invalid_file = "$fixtures_dir/invalid_complex_mod.json";
-    my $malformed_file = "$fixtures_dir/malformed_complex_mod.json";
+    # Test malformed but valid JSON fails (missing required fields)
+    ok(!validate_files(get_path('malformed_complex_mod')), 'Malformed JSON fails validation')
+        or diag("Malformed JSON validation unexpectedly passed");
 
-    # Run validations with actual karabiner_cli
-    my $result_valid = validate_files($KARABINER_CLI, $valid_file);
-    ok($result_valid, 'Valid JSON passes validation');
+    # Test multiple files with one invalid fails
+    ok(!validate_files(
+        get_path('valid_complex_mod'), 
+        get_path('invalid_complex_mod')
+    ), 'Multiple files with one invalid file fails validation')
+        or diag("Multiple file validation unexpectedly passed");
 
-    my $result_invalid = validate_files($KARABINER_CLI, $invalid_file);
-    ok(!$result_invalid, 'Invalid JSON fails validation');
-
-    my $result_malformed = validate_files($KARABINER_CLI, $malformed_file);
-    ok(!$result_malformed, 'Malformed JSON fails validation');
-
-    my $result_multiple = validate_files($KARABINER_CLI, $valid_file, $invalid_file);
-    ok(!$result_multiple, 'Multiple files with one invalid file fails validation');
+    # Test non-existent file fails
+    ok(!validate_files(File::Spec->catfile($RealBin, 'nonexistent.json')), 
+       'Non-existent file fails validation')
+        or diag("Non-existent file validation unexpectedly passed");
 };
+
+done_testing();

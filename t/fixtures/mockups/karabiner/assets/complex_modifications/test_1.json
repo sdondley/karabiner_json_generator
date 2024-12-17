@@ -1,0 +1,9 @@
+{
+    "title": "Test Rule 1",
+    "rules": [
+        {
+            "description": "Test Rule 1 Description",
+            "manipulators": []
+        }
+    ]
+}

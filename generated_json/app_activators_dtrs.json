@@ -2,7 +2,7 @@
   "title": "App Activators - Double Tap Right Shift Triggers",
   "rules": [
     {
-      "description": "Double tap left shift-a to Activity Monitor",
+      "description": "Double tap right shift-a to Activity Monitor",
       "manipulators": [
         {
           "type": "basic",
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "description": "Double tap left shift-s to Safari",
+      "description": "Double tap right shift-s to Safari",
       "manipulators": [
         {
           "type": "basic",
@@ -64,7 +64,7 @@
       ]
     },
     {
-      "description": "Double tap left shift-d to Discord",
+      "description": "Double tap right shift-d to Discord",
       "manipulators": [
         {
           "type": "basic",
@@ -95,7 +95,7 @@
       ]
     },
     {
-      "description": "Double tap left shift-f to Finder",
+      "description": "Double tap right shift-f to Finder",
       "manipulators": [
         {
           "type": "basic",

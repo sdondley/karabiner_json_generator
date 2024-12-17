@@ -7,7 +7,7 @@
     [%- IF !first %],[% END -%]
     [%- SET first = 0 -%]
     {
-      "description": "Double tap left shift-[% app.trigger_key %] to [% app.app_name %]",
+      "description": "Double tap right shift-[% app.trigger_key %] to [% app.app_name %]",
       "manipulators": [{
         "type": "basic",
         "conditions": [{
@@ -20,7 +20,8 @@
         },
         "to": [{
           "shell_command": "[% shell_command %] '[% app.app_name %]'"
-        }],
+        }
+        ],
         "to_after_key_up": [{
           "set_variable": {
             "name": "double_tap_rshift",

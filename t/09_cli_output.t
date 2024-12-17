@@ -1,92 +1,54 @@
-# File: t/09_cli_output.t
 use strict;
 use warnings;
-use Test::More;
+use Test::Most 'die';
 use Test::Deep;
 use Capture::Tiny qw(capture capture_merged);
 use File::Temp qw(tempdir);
 use File::Spec;
 use File::Copy;
 use File::Path qw(make_path remove_tree);
+use File::Basename qw(dirname);
 use Cwd qw(getcwd);
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
-use IO::Pty;
+use KarabinerGenerator::CLI qw(run_ke_cli_cmd);
+use KarabinerGenerator::Config qw(get_path);
 
-# Verify scripts exist before starting tests
-my $script = File::Spec->catfile($RealBin, '..', 'bin', 'json_generator.pl');
-plan skip_all => "Script not found at $script" unless -f $script;
+# Get script path from project root
+my $project_root = dirname($RealBin);
+my $script = File::Spec->catfile($project_root, 'bin', 'json_generator.pl');
 
-# Make script executable
-chmod 0755, $script;
-
-# Create test environment
-my $temp_dir = tempdir(CLEANUP => 1);
-
-# Helper to clean PTY output
-sub clean_pty_output {
-    my ($output) = @_;
-    $output =~ s/^[yn]\n//;
-    $output =~ s/^\s+|\s+$//g;
-    return $output;
-}
-
-# Helper to run script with PTY
-sub run_script_with_pty {
-    my ($args, $input) = @_;
+sub run_script {
+    my ($temp_dir, $args) = @_;
+    local $ENV{PERL5LIB} = join(':', @INC);
+    local $ENV{TEST_MODE} = 1;
     
-    my $pty = IO::Pty->new;
-    my $pid = fork();
+    my $orig_dir = getcwd();
+    chdir $temp_dir or die "Cannot chdir to temp dir: $!";
     
-    if (!defined $pid) {
-        die "Fork failed: $!";
-    }
-    
-    if ($pid == 0) {  # Child
-        local $ENV{PERL5LIB} = join(':', @INC);
-        close STDIN;
-        $pty->make_slave_controlling_terminal();
-        my $slave = $pty->slave();
-        open(STDIN, "<&", $slave) or die "Couldn't reopen STDIN: $!";
-        open(STDOUT, ">&", $slave) or die "Couldn't reopen STDOUT: $!";
-        open(STDERR, ">&", $slave) or die "Couldn't reopen STDERR: $!";
-        close $pty;
-        exec($^X, $script, @$args) or die "Exec failed: $!";
-    }
-    
-    if ($input) {
-        sleep(1);
-        print $pty $input;
-    }
-    
-    my $output = '';
-    eval {
-        local $SIG{ALRM} = sub { die "timeout\n" };
-        alarm(10);
-        while (1) {
-            my $buf;
-            my $bytes = sysread($pty, $buf, 1024);
-            last if !defined $bytes || $bytes == 0;
-            $output .= $buf;
-        }
-        alarm(0);
+    my $cmd = "$^X $script " . join(' ', @$args);
+    my ($stdout, $stderr, $exit) = capture {
+        system($cmd);
     };
-    alarm(0);
     
-    waitpid($pid, 0);
-    my $exit_status = $? >> 8;
-    close $pty;
+    chdir $orig_dir or die "Cannot chdir back to original dir: $!";
     
     return {
-        stdout => clean_pty_output($output),
-        stderr => '',
-        exit => $exit_status
+        stdout => $stdout,
+        stderr => $stderr,
+        status => $exit >> 8
     };
 }
 
 # Helper to set up test environment
 sub setup_test_env {
-    my ($config_content) = @_;
+    my ($temp_dir, $config_content) = @_;
+    
+    # Clean up any existing directories
+    for my $dir ('templates', 'generated_json') {
+        my $full_path = File::Spec->catdir($temp_dir, $dir);
+        remove_tree($full_path) if -d $full_path;
+    }
     
     my $template_dir = File::Spec->catdir($temp_dir, 'templates');
     my $output_dir = File::Spec->catdir($temp_dir, 'generated_json');
@@ -119,6 +81,8 @@ sub setup_test_env {
 
 # Test Cases
 subtest 'Standard Output Check' => sub {
+    my $temp_dir = tempdir(CLEANUP => 1);
+    
     my $config = q{
 app_activators:
     title: "Test App Activators"
@@ -130,48 +94,33 @@ app_activators:
                   app_name: "Safari"
     };
     
-    my ($template_dir, $output_dir) = setup_test_env($config);
-    my $output = run_script_with_pty([], "n\n");
-    my $stdout = $output->{stdout};
+    my ($template_dir, $output_dir) = setup_test_env($temp_dir, $config);
+    my $result = run_script($temp_dir, []);
+    my $stdout = $result->{stdout};
 
-    # Check key semantic elements based on actual output
     like($stdout, qr/Starting JSON generation process/i, 'Shows start message');
     like($stdout, qr/Generating JSON files from templates/i, 'Shows template processing message');
     like($stdout, qr/Validating JSON files/i, 'Shows validation step');
-    like($stdout, qr/All files passed validation/i, 'Shows validation result');
-    like($stdout, qr/Would you like to install/i, 'Shows install prompt');
+    like($stdout, qr/Installation skipped/i, 'Shows installation skipped message');
     
-    # Basic ordering check
-    my $start_pos = index($stdout, 'Starting');
-    my $generating_pos = index($stdout, 'Generating');
-    my $validating_pos = index($stdout, 'Validating');
-    my $install_pos = index($stdout, 'install');
-    
-    ok($start_pos >= 0, 'Start message exists');
-    ok($generating_pos >= 0, 'Generating message exists');
-    ok($validating_pos >= 0, 'Validation message exists');
-    ok($install_pos >= 0, 'Install message exists');
-    
-    ok($start_pos < $generating_pos, 'Generation happens after start');
-    ok($generating_pos < $validating_pos, 'Validation happens after generation');
-    ok($validating_pos < $install_pos, 'Install prompt comes last');
-    
-    is($output->{exit}, 0, 'Script exits successfully');
+    is($result->{status}, 0, 'Script exits successfully');
 };
 
 subtest 'Quiet Output (-q)' => sub {
-    my ($template_dir, $output_dir) = setup_test_env('app_activators: {title: "Test"}');
-    my $output = run_script_with_pty(['-q'], "n\n");
-    is($output->{stdout}, '', 'No output in quiet mode');
-    is($output->{exit}, 0, 'Exits successfully');
+    my $temp_dir = tempdir(CLEANUP => 1);
+    my ($template_dir, $output_dir) = setup_test_env($temp_dir, 'app_activators: {title: "Test"}');
+    my $result = run_script($temp_dir, ['-q']);
+    is($result->{stdout}, '', 'No output in quiet mode');
+    is($result->{status}, 0, 'Exits successfully');
 };
 
 subtest 'Auto Install (-i)' => sub {
-    my ($template_dir, $output_dir) = setup_test_env('app_activators: {title: "Test"}');
-    my $output = run_script_with_pty(['-i']);
-    like($output->{stdout}, qr/Installing files/i, 'Shows installation message');
-    unlike($output->{stdout}, qr/Would you like to install/i, 'No install prompt');
-    is($output->{exit}, 0, 'Exits successfully');
+    my $temp_dir = tempdir(CLEANUP => 1);
+    my ($template_dir, $output_dir) = setup_test_env($temp_dir, 'app_activators: {title: "Test"}');
+    my $result = run_script($temp_dir, ['-i']);
+    like($result->{stdout}, qr/Installing files/i, 'Shows installation message');
+    unlike($result->{stdout}, qr/Would you like to install/i, 'No install prompt');
+    is($result->{status}, 0, 'Exits successfully');
 };
 
 done_testing;

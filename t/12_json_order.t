@@ -1,4 +1,3 @@
-# File: t/12_json_order.t
 use strict;
 use warnings;
 use Test::More;
@@ -10,16 +9,16 @@ use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
 use JSON;
 
-BEGIN { $ENV{TEST_MODE} = 1; }
-
-use KarabinerGenerator::Config qw(load_config);
+use KarabinerGenerator::Config qw(load_config get_path mode);
 use KarabinerGenerator::Template qw(process_templates);
 
-# Create temp test environment
-my $temp_dir = tempdir(CLEANUP => 1);
-my $template_dir = File::Spec->catdir($temp_dir, 'templates');
-my $output_dir = File::Spec->catdir($temp_dir, 'generated_json');
-make_path($template_dir, $output_dir);
+# Set test mode
+mode('test');
+
+# Get paths from Config.pm
+my $template_dir = get_path('templates_dir');
+my $output_dir = get_path('generated_json_dir');
+my $config_file = get_path('config_yaml');
 
 # Create test config with specifically ordered properties
 my $config_content = qq{
@@ -36,7 +35,6 @@ app_activators:
 };
 
 # Create config file
-my $config_file = File::Spec->catfile($temp_dir, 'config.yaml');
 open my $config_fh, '>', $config_file or die "Cannot create config file: $!";
 print $config_fh $config_content;
 close $config_fh;
@@ -79,19 +77,19 @@ subtest 'JSON Property Order Consistency' => sub {
     # Generate JSON file twice
     my @first_gen = process_templates($template_dir, load_config($config_file), $output_dir);
     my $first_json = do {
-        open my $fh, '<', $first_gen[0] or die "Cannot read first generation: $!";
         local $/;
+        open my $fh, '<', $first_gen[0] or die "Cannot read first generation: $!";
         <$fh>;
     };
 
-    # Clear output directory
+    # Clear output directory and regenerate files
     unlink glob "$output_dir/*";
 
     # Generate again
     my @second_gen = process_templates($template_dir, load_config($config_file), $output_dir);
     my $second_json = do {
-        open my $fh, '<', $second_gen[0] or die "Cannot read second generation: $!";
         local $/;
+        open my $fh, '<', $second_gen[0] or die "Cannot read second generation: $!";
         <$fh>;
     };
 

@@ -1,7 +1,7 @@
 # File: t/06_utils.t
 use strict;
 use warnings;
-use Test::More;
+use Test::Most 'die';
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
 

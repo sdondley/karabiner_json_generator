@@ -1,67 +1,55 @@
 package KarabinerGenerator::ComplexModifiers;
+
 use strict;
 use warnings;
+use JSON::PP;
 use File::Copy;
 use File::Path qw(make_path);
-use File::Basename qw(basename);
-use File::Spec;
-use Exporter "import";
-use KarabinerGenerator::Config qw(get_paths);
-use KarabinerGenerator::Validator qw(validate_files);
-use JSON;
+use File::Basename;
+use Try::Tiny;
+use Exporter 'import';
 
 our @EXPORT_OK = qw(validate_complex_modifiers install_complex_modifiers);
+use KarabinerGenerator::CLI qw(run_ke_cli_cmd);
 
 sub validate_complex_modifiers {
     my ($file) = @_;
+
     return 0 unless -f $file;
 
-    # First validate JSON structure
-    my $json_text = do {
-        local $/;
-        open my $fh, '<', $file or return 0;
-        <$fh>;
-    };
+    my $result = run_ke_cli_cmd(['--lint-complex-modifications', $file]);
 
-    my $json_data;
-    eval {
-        $json_data = decode_json($json_text);
-    };
-    return 0 if $@ || !$json_data;
-
-    # Validate required fields
-    return 0 unless $json_data->{title} && ref($json_data->{rules}) eq 'ARRAY';
-
-    # Skip CLI validation in test mode
-    return 1 if $ENV{TEST_MODE};
-
-    # Then validate with karabiner_cli
-    my ($cli_path, undef, undef) = get_paths({global => {}});
-    return validate_files($cli_path, $file);
+    # Return 1 for success (status 0), 0 for any failure
+    return $result->{status} == 0;
 }
 
 sub install_complex_modifiers {
-    my ($source_file, $dest_dir) = @_;
-    return 0 unless -f $source_file;
+    my ($source, $dest_dir) = @_;
+
+    # Validate source file
+    unless (validate_complex_modifiers($source)) {
+        warn "Invalid complex modifier file: $source";
+        return 0;
+    }
 
     # Create destination directory if it doesn't exist
-    eval {
-        make_path($dest_dir);
-    };
-    return 0 if $@;
-
-    my $dest_file = File::Spec->catfile($dest_dir, basename($source_file));
-
-    # Copy the file
-    return 0 unless copy($source_file, $dest_file);
-
-    # Set permissions to match original
-    eval {
-        my $mode = (stat($source_file))[2] & 07777;
-        chmod($mode, $dest_file);
+    try {
+        make_path($dest_dir) unless -d $dest_dir;
+    } catch {
+        warn "Could not create destination directory: $_";
+        return 0;
     };
 
-    return 1;
+    # Copy file to destination
+    my $dest_file = File::Spec->catfile($dest_dir, basename($source));
+    try {
+        copy($source, $dest_file) or die $!;
+    } catch {
+        warn "Failed to copy file: $_";
+        return 0;
+    };
+
+    return -f $dest_file;
 }
 
 1;

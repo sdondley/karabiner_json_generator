@@ -1,0 +1,36 @@
+{
+  "title": "App Activators - Left-Right Shift Sequence Triggers",
+  "rules": [
+    {
+      "description": "Left-Right shift quick press + s to System Settings",
+      "manipulators": [
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "variable_if",
+              "name": "lr_shift",
+              "value": 1
+            }
+          ],
+          "from": {
+            "key_code": "s"
+          },
+          "to": [
+            {
+              "shell_command": "/Users/steve/bin/master.sh 'System Settings'"
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "lr_shift",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

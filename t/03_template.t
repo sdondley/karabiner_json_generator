@@ -1,24 +1,21 @@
-# File: t/03_template.t
 use strict;
 use warnings;
-use Test::More;
-use File::Temp qw(tempdir);
+use Test::Most 'die';
 use FindBin qw($RealBin);
 use lib "$RealBin/../lib";
 use JSON;
-
-BEGIN { $ENV{TEST_MODE} = 1; }
+use File::Spec;
 
 use KarabinerGenerator::Template qw(process_templates);
+use KarabinerGenerator::Config qw(get_path mode);
 
-# Create temp test environment
-my $tmp_dir = tempdir(CLEANUP => 1);
-mkdir "$tmp_dir/templates";
-mkdir "$tmp_dir/output";
+# Ensure we're in test mode
+mode('test');
 
 # Create test template
 sub create_test_template {
-    open my $fh, '>', "$tmp_dir/templates/test.json.tpl" or die $!;
+    my $template_file = File::Spec->catfile(get_path('templates_dir'), 'test.json.tpl');
+    open my $fh, '>', $template_file or die "Cannot create template: $!";
     print $fh q{
 {
     "title": "[% test.title %]",
@@ -26,13 +23,14 @@ sub create_test_template {
 }
     };
     close $fh;
+    return $template_file;
 }
 
 # Test template processing
 subtest 'Template Processing' => sub {
     plan tests => 4;
     
-    create_test_template();
+    my $template_file = create_test_template();
     
     my $config = {
         test => {
@@ -41,16 +39,19 @@ subtest 'Template Processing' => sub {
     };
     
     my @files = process_templates(
-        "$tmp_dir/templates",
+        get_path('templates_dir'),
         $config,
-        "$tmp_dir/output"
+        get_path('generated_json_dir')
     );
     
     ok(@files, 'Files generated');
-    ok(-f $files[0], 'Output file exists');
+    
+    # Find our specific test output file
+    my $test_output_file = File::Spec->catfile(get_path('generated_json_dir'), 'test.json');
+    ok(-f $test_output_file, 'Output file exists');
     
     # Test file content
-    open my $fh, '<', $files[0] or die $!;
+    open my $fh, '<', $test_output_file or die $!;
     my $content = do { local $/; <$fh> };
     close $fh;
     

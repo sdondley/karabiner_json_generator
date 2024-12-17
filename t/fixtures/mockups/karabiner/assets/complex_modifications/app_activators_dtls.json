@@ -1,0 +1,160 @@
+{
+  "title": "App Activators - Double Tap Left Shift Triggers",
+  "rules": [
+    {
+      "description": "Double tap left shift-i to iTerm",
+      "manipulators": [
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "variable_if",
+              "name": "double_tap_lshift",
+              "value": 2
+            }
+          ],
+          "from": {
+            "key_code": "i"
+          },
+          "to": [
+            {
+              "shell_command": "/Users/steve/bin/master.sh 'iTerm'"
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "double_tap_lshift",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Double tap left shift-m to Mail",
+      "manipulators": [
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "variable_if",
+              "name": "double_tap_lshift",
+              "value": 2
+            }
+          ],
+          "from": {
+            "key_code": "m"
+          },
+          "to": [
+            {
+              "shell_command": "/Users/steve/bin/master.sh 'Mail'"
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "double_tap_lshift",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Double tap left shift-n to Notes",
+      "manipulators": [
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "variable_if",
+              "name": "double_tap_lshift",
+              "value": 2
+            }
+          ],
+          "from": {
+            "key_code": "n"
+          },
+          "to": [
+            {
+              "shell_command": "/Users/steve/bin/master.sh 'Notes'"
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "double_tap_lshift",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Double tap left shift-k to Karabiner-Elements",
+      "manipulators": [
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "variable_if",
+              "name": "double_tap_lshift",
+              "value": 2
+            }
+          ],
+          "from": {
+            "key_code": "k"
+          },
+          "to": [
+            {
+              "shell_command": "/Users/steve/bin/master.sh 'Karabiner-Elements'"
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "double_tap_lshift",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Double tap left shift-p to Preview",
+      "manipulators": [
+        {
+          "type": "basic",
+          "conditions": [
+            {
+              "type": "variable_if",
+              "name": "double_tap_lshift",
+              "value": 2
+            }
+          ],
+          "from": {
+            "key_code": "p"
+          },
+          "to": [
+            {
+              "shell_command": "/Users/steve/bin/master.sh 'Preview'"
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "double_tap_lshift",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
