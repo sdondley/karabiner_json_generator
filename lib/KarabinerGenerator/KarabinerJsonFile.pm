@@ -306,7 +306,7 @@ sub update_generated_rules {
     return 0 unless -d $rules_dir;
 
     # Find or create Generated Json profile
-    my $profile_name = 'Generated Json';
+    my $profile_name = 'Generated JSON';
     my ($profile) = grep { $_->{name} eq $profile_name } @{$config->{profiles}};
 
     unless ($profile) {
