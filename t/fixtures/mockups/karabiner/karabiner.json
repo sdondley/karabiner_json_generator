@@ -1,1 +1,766 @@
-{"profiles":[{"complex_modifications":{"rules":[{"description":"Test Rule 1","manipulators":[]}]},"name":"Default"},{"name":"Test","complex_modifications":{"rules":[]}},{"name":"Generated Json","complex_modifications":{"rules":[{"description":"Left-Right shift quick press + s to System Settings","manipulators":[{"conditions":[{"type":"variable_if","value":1,"name":"lr_shift"}],"to_after_key_up":[{"set_variable":{"value":0,"name":"lr_shift"}}],"from":{"key_code":"s"},"to":[{"shell_command":"/Users/steve/bin/master.sh 'System Settings'"}],"type":"basic"}]},{"description":"Test Rule 1 Description","manipulators":[]},{"description":"Complex modifier: Double tap right shift","manipulators":[{"conditions":[{"type":"variable_if","value":1,"name":"double_tap_rshift"}],"from":{"key_code":"right_shift"},"to_delayed_action":{"to_if_canceled":[{"set_variable":{"value":0,"name":"double_tap_rshift"}},{"key_code":"right_shift"}],"to_if_invoked":[{"set_variable":{"value":0,"name":"double_tap_rshift"}},{"key_code":"right_shift"}]},"to_if_alone":[{"set_variable":{"name":"double_tap_rshift","value":2}}],"to":{"key_code":"right_shift"},"type":"basic"},{"from":{"key_code":"right_shift"},"to_if_alone":[{"set_variable":{"name":"double_tap_rshift","value":1}}],"to_delayed_action":{"to_if_invoked":[{"set_variable":{"name":"double_tap_rshift","value":0}}],"to_if_canceled":[{"set_variable":{"name":"double_tap_rshift","value":0}},{"key_code":"right_shift"}]},"to":{"key_code":"right_shift"},"type":"basic"}]},{"manipulators":[{"from":{"key_code":"left_shift"},"conditions":[{"type":"variable_if","value":1,"name":"double_tap_lshift"}],"to_if_alone":[{"set_variable":{"name":"double_tap_lshift","value":2}}],"to_delayed_action":{"to_if_canceled":[{"set_variable":{"name":"double_tap_lshift","value":0}},{"key_code":"left_shift"}],"to_if_invoked":[{"set_variable":{"value":0,"name":"double_tap_lshift"}},{"key_code":"left_shift"}]},"to":{"key_code":"left_shift"},"type":"basic"},{"from":{"key_code":"left_shift"},"to_if_alone":[{"set_variable":{"value":1,"name":"double_tap_lshift"}}],"to_delayed_action":{"to_if_invoked":[{"set_variable":{"value":0,"name":"double_tap_lshift"}}],"to_if_canceled":[{"set_variable":{"value":0,"name":"double_tap_lshift"}},{"key_code":"left_shift"}]},"to":{"key_code":"left_shift"},"type":"basic"}],"description":"Complex modifier: Double tap left shift"},{"manipulators":[{"conditions":[{"type":"variable_if","value":0,"name":"lr_shift"}],"from":{"modifiers":{"mandatory":["left_shift"]},"key_code":"right_shift"},"to_if_held_down":[{"set_variable":{"value":2,"name":"lr_shift"}},{"set_notification_message":{"text":"LR shift pressed","id":"org.pqrs.long_lr_shift"}}],"type":"basic","to":[{"set_variable":{"value":1,"name":"lr_shift"}}],"parameters":{"basic.to_if_held_down_threshold_milliseconds":150}},{"type":"basic","to":[{"set_variable":{"value":0,"name":"lr_shift"}}],"from":{"key_code":"right_shift","modifiers":{"mandatory":["left_shift"]}},"conditions":[{"name":"lr_shift","value":1,"type":"variable_if"}]},{"to":[{"set_variable":{"value":0,"name":"lr_shift"}},{"set_notification_message":{"id":"org.pqrs.long_lr_shift","text":""}}],"type":"basic","conditions":[{"type":"variable_if","name":"lr_shift","value":2}],"from":{"modifiers":{"mandatory":["left_shift"]},"key_code":"right_shift"}}],"description":"Complex modifier: LR-shift & L-long-R-shift"},{"manipulators":[{"type":"basic","to":[{"set_variable":{"name":"rl_shift","value":1}}],"parameters":{"basic.to_if_held_down_threshold_milliseconds":150},"conditions":[{"type":"variable_if","name":"rl_shift","value":0}],"from":{"modifiers":{"mandatory":["right_shift"]},"key_code":"left_shift"},"to_if_held_down":[{"set_variable":{"name":"rl_shift","value":2}},{"set_notification_message":{"text":"RL shift pressed","id":"org.pqrs.long_rl_shift"}}]},{"from":{"modifiers":{"mandatory":["right_shift"]},"key_code":"left_shift"},"conditions":[{"type":"variable_if","name":"rl_shift","value":1}],"type":"basic","to":[{"set_variable":{"name":"rl_shift","value":0}}]},{"to":[{"set_variable":{"value":0,"name":"rl_shift"}},{"set_notification_message":{"text":"","id":"org.pqrs.long_rl_shift"}}],"type":"basic","conditions":[{"type":"variable_if","value":2,"name":"rl_shift"}],"from":{"key_code":"left_shift","modifiers":{"mandatory":["right_shift"]}}}],"description":"Complex modifier: RL-shift & R-long-L-shift"},{"manipulators":[{"from":{"key_code":"i"},"conditions":[{"type":"variable_if","name":"double_tap_lshift","value":2}],"to_after_key_up":[{"set_variable":{"value":0,"name":"double_tap_lshift"}}],"to":[{"shell_command":"/Users/steve/bin/master.sh 'iTerm'"}],"type":"basic"}],"description":"Double tap left shift-i to iTerm"},{"manipulators":[{"from":{"key_code":"m"},"conditions":[{"type":"variable_if","value":2,"name":"double_tap_lshift"}],"to_after_key_up":[{"set_variable":{"value":0,"name":"double_tap_lshift"}}],"type":"basic","to":[{"shell_command":"/Users/steve/bin/master.sh 'Mail'"}]}],"description":"Double tap left shift-m to Mail"},{"description":"Double tap left shift-n to Notes","manipulators":[{"from":{"key_code":"n"},"to_after_key_up":[{"set_variable":{"value":0,"name":"double_tap_lshift"}}],"conditions":[{"value":2,"name":"double_tap_lshift","type":"variable_if"}],"type":"basic","to":[{"shell_command":"/Users/steve/bin/master.sh 'Notes'"}]}]},{"description":"Double tap left shift-k to Karabiner-Elements","manipulators":[{"type":"basic","to":[{"shell_command":"/Users/steve/bin/master.sh 'Karabiner-Elements'"}],"to_after_key_up":[{"set_variable":{"name":"double_tap_lshift","value":0}}],"conditions":[{"type":"variable_if","name":"double_tap_lshift","value":2}],"from":{"key_code":"k"}}]},{"description":"Double tap left shift-p to Preview","manipulators":[{"to_after_key_up":[{"set_variable":{"name":"double_tap_lshift","value":0}}],"conditions":[{"type":"variable_if","value":2,"name":"double_tap_lshift"}],"from":{"key_code":"p"},"to":[{"shell_command":"/Users/steve/bin/master.sh 'Preview'"}],"type":"basic"}]},{"description":"Test Rule 2 Description","manipulators":[]},{"description":"Double tap left shift-a to Activity Monitor","manipulators":[{"conditions":[{"name":"double_tap_rshift","value":2,"type":"variable_if"}],"to_after_key_up":[{"set_variable":{"value":0,"name":"double_tap_rshift"}}],"from":{"key_code":"a"},"to":[{"shell_command":"/Users/steve/bin/master.sh 'Activity Monitor'"}],"type":"basic"}]},{"description":"Double tap left shift-s to Safari","manipulators":[{"to":[{"shell_command":"/Users/steve/bin/master.sh 'Safari'"}],"type":"basic","conditions":[{"type":"variable_if","name":"double_tap_rshift","value":2}],"to_after_key_up":[{"set_variable":{"value":0,"name":"double_tap_rshift"}}],"from":{"key_code":"s"}}]},{"manipulators":[{"type":"basic","to":[{"shell_command":"/Users/steve/bin/master.sh 'Discord'"}],"to_after_key_up":[{"set_variable":{"value":0,"name":"double_tap_rshift"}}],"conditions":[{"value":2,"name":"double_tap_rshift","type":"variable_if"}],"from":{"key_code":"d"}}],"description":"Double tap left shift-d to Discord"},{"manipulators":[{"from":{"key_code":"f"},"to_after_key_up":[{"set_variable":{"name":"double_tap_rshift","value":0}}],"conditions":[{"type":"variable_if","value":2,"name":"double_tap_rshift"}],"to":[{"shell_command":"/Users/steve/bin/master.sh 'Finder'"}],"type":"basic"}],"description":"Double tap left shift-f to Finder"},{"description":"Test Rule","manipulators":[{"from":{"key_code":"a"},"to":[{"key_code":"b"}],"type":"basic"}]}],"parameters":{"basic.simultaneous_threshold_milliseconds":50}},"selected":"true"}],"global":{"show_in_menu_bar":"true","show_profile_name_in_menu_bar":"true","check_for_updates_on_startup":"true"}}
+{
+   "profiles" : [
+      {
+         "name" : "Default",
+         "complex_modifications" : {
+            "rules" : [
+               {
+                  "manipulators" : [],
+                  "description" : "Test Rule 1"
+               }
+            ]
+         }
+      },
+      {
+         "complex_modifications" : {
+            "rules" : []
+         },
+         "name" : "Test"
+      },
+      {
+         "complex_modifications" : {
+            "rules" : [
+               {
+                  "description" : "Test Rule",
+                  "manipulators" : [
+                     {
+                        "to" : [
+                           {
+                              "key_code" : "b"
+                           }
+                        ],
+                        "from" : {
+                           "key_code" : "a"
+                        },
+                        "type" : "basic"
+                     }
+                  ]
+               },
+               {
+                  "description" : "Double tap left shift-f to Finder",
+                  "manipulators" : [
+                     {
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'Finder'"
+                           }
+                        ],
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "double_tap_rshift",
+                                 "value" : 0
+                              }
+                           }
+                        ],
+                        "type" : "basic",
+                        "conditions" : [
+                           {
+                              "value" : 2,
+                              "type" : "variable_if",
+                              "name" : "double_tap_rshift"
+                           }
+                        ],
+                        "from" : {
+                           "key_code" : "f"
+                        }
+                     }
+                  ]
+               },
+               {
+                  "manipulators" : [
+                     {
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 0,
+                                 "name" : "double_tap_rshift"
+                              }
+                           }
+                        ],
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'Discord'"
+                           }
+                        ],
+                        "conditions" : [
+                           {
+                              "value" : 2,
+                              "name" : "double_tap_rshift",
+                              "type" : "variable_if"
+                           }
+                        ],
+                        "type" : "basic",
+                        "from" : {
+                           "key_code" : "d"
+                        }
+                     }
+                  ],
+                  "description" : "Double tap left shift-d to Discord"
+               },
+               {
+                  "description" : "Double tap left shift-s to Safari",
+                  "manipulators" : [
+                     {
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 0,
+                                 "name" : "double_tap_rshift"
+                              }
+                           }
+                        ],
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'Safari'"
+                           }
+                        ],
+                        "conditions" : [
+                           {
+                              "value" : 2,
+                              "name" : "double_tap_rshift",
+                              "type" : "variable_if"
+                           }
+                        ],
+                        "type" : "basic",
+                        "from" : {
+                           "key_code" : "s"
+                        }
+                     }
+                  ]
+               },
+               {
+                  "description" : "Double tap left shift-a to Activity Monitor",
+                  "manipulators" : [
+                     {
+                        "type" : "basic",
+                        "conditions" : [
+                           {
+                              "type" : "variable_if",
+                              "name" : "double_tap_rshift",
+                              "value" : 2
+                           }
+                        ],
+                        "from" : {
+                           "key_code" : "a"
+                        },
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "double_tap_rshift",
+                                 "value" : 0
+                              }
+                           }
+                        ],
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'Activity Monitor'"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "description" : "Test Rule 2 Description",
+                  "manipulators" : []
+               },
+               {
+                  "description" : "Double tap left shift-p to Preview",
+                  "manipulators" : [
+                     {
+                        "from" : {
+                           "key_code" : "p"
+                        },
+                        "conditions" : [
+                           {
+                              "name" : "double_tap_lshift",
+                              "type" : "variable_if",
+                              "value" : 2
+                           }
+                        ],
+                        "type" : "basic",
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'Preview'"
+                           }
+                        ],
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "double_tap_lshift",
+                                 "value" : 0
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "description" : "Double tap left shift-k to Karabiner-Elements",
+                  "manipulators" : [
+                     {
+                        "conditions" : [
+                           {
+                              "name" : "double_tap_lshift",
+                              "type" : "variable_if",
+                              "value" : 2
+                           }
+                        ],
+                        "type" : "basic",
+                        "from" : {
+                           "key_code" : "k"
+                        },
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'Karabiner-Elements'"
+                           }
+                        ],
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "double_tap_lshift",
+                                 "value" : 0
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "description" : "Double tap left shift-n to Notes",
+                  "manipulators" : [
+                     {
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'Notes'"
+                           }
+                        ],
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 0,
+                                 "name" : "double_tap_lshift"
+                              }
+                           }
+                        ],
+                        "from" : {
+                           "key_code" : "n"
+                        },
+                        "type" : "basic",
+                        "conditions" : [
+                           {
+                              "name" : "double_tap_lshift",
+                              "type" : "variable_if",
+                              "value" : 2
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "manipulators" : [
+                     {
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "double_tap_lshift",
+                                 "value" : 0
+                              }
+                           }
+                        ],
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'Mail'"
+                           }
+                        ],
+                        "from" : {
+                           "key_code" : "m"
+                        },
+                        "conditions" : [
+                           {
+                              "value" : 2,
+                              "name" : "double_tap_lshift",
+                              "type" : "variable_if"
+                           }
+                        ],
+                        "type" : "basic"
+                     }
+                  ],
+                  "description" : "Double tap left shift-m to Mail"
+               },
+               {
+                  "manipulators" : [
+                     {
+                        "from" : {
+                           "key_code" : "i"
+                        },
+                        "type" : "basic",
+                        "conditions" : [
+                           {
+                              "type" : "variable_if",
+                              "name" : "double_tap_lshift",
+                              "value" : 2
+                           }
+                        ],
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'iTerm'"
+                           }
+                        ],
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 0,
+                                 "name" : "double_tap_lshift"
+                              }
+                           }
+                        ]
+                     }
+                  ],
+                  "description" : "Double tap left shift-i to iTerm"
+               },
+               {
+                  "manipulators" : [
+                     {
+                        "conditions" : [
+                           {
+                              "name" : "rl_shift",
+                              "type" : "variable_if",
+                              "value" : 0
+                           }
+                        ],
+                        "from" : {
+                           "key_code" : "left_shift",
+                           "modifiers" : {
+                              "mandatory" : [
+                                 "right_shift"
+                              ]
+                           }
+                        },
+                        "to_if_held_down" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "rl_shift",
+                                 "value" : 2
+                              }
+                           },
+                           {
+                              "set_notification_message" : {
+                                 "text" : "RL shift pressed",
+                                 "id" : "org.pqrs.long_rl_shift"
+                              }
+                           }
+                        ],
+                        "to" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 1,
+                                 "name" : "rl_shift"
+                              }
+                           }
+                        ],
+                        "type" : "basic",
+                        "parameters" : {
+                           "basic.to_if_held_down_threshold_milliseconds" : 150
+                        }
+                     },
+                     {
+                        "conditions" : [
+                           {
+                              "type" : "variable_if",
+                              "name" : "rl_shift",
+                              "value" : 1
+                           }
+                        ],
+                        "type" : "basic",
+                        "from" : {
+                           "key_code" : "left_shift",
+                           "modifiers" : {
+                              "mandatory" : [
+                                 "right_shift"
+                              ]
+                           }
+                        },
+                        "to" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 0,
+                                 "name" : "rl_shift"
+                              }
+                           }
+                        ]
+                     },
+                     {
+                        "to" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 0,
+                                 "name" : "rl_shift"
+                              }
+                           },
+                           {
+                              "set_notification_message" : {
+                                 "text" : "",
+                                 "id" : "org.pqrs.long_rl_shift"
+                              }
+                           }
+                        ],
+                        "from" : {
+                           "modifiers" : {
+                              "mandatory" : [
+                                 "right_shift"
+                              ]
+                           },
+                           "key_code" : "left_shift"
+                        },
+                        "conditions" : [
+                           {
+                              "type" : "variable_if",
+                              "name" : "rl_shift",
+                              "value" : 2
+                           }
+                        ],
+                        "type" : "basic"
+                     }
+                  ],
+                  "description" : "Complex modifier: RL-shift & R-long-L-shift"
+               },
+               {
+                  "description" : "Complex modifier: LR-shift & L-long-R-shift",
+                  "manipulators" : [
+                     {
+                        "to" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 1,
+                                 "name" : "lr_shift"
+                              }
+                           }
+                        ],
+                        "to_if_held_down" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 2,
+                                 "name" : "lr_shift"
+                              }
+                           },
+                           {
+                              "set_notification_message" : {
+                                 "id" : "org.pqrs.long_lr_shift",
+                                 "text" : "LR shift pressed"
+                              }
+                           }
+                        ],
+                        "from" : {
+                           "modifiers" : {
+                              "mandatory" : [
+                                 "left_shift"
+                              ]
+                           },
+                           "key_code" : "right_shift"
+                        },
+                        "conditions" : [
+                           {
+                              "type" : "variable_if",
+                              "name" : "lr_shift",
+                              "value" : 0
+                           }
+                        ],
+                        "parameters" : {
+                           "basic.to_if_held_down_threshold_milliseconds" : 150
+                        },
+                        "type" : "basic"
+                     },
+                     {
+                        "to" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 0,
+                                 "name" : "lr_shift"
+                              }
+                           }
+                        ],
+                        "from" : {
+                           "key_code" : "right_shift",
+                           "modifiers" : {
+                              "mandatory" : [
+                                 "left_shift"
+                              ]
+                           }
+                        },
+                        "conditions" : [
+                           {
+                              "value" : 1,
+                              "type" : "variable_if",
+                              "name" : "lr_shift"
+                           }
+                        ],
+                        "type" : "basic"
+                     },
+                     {
+                        "conditions" : [
+                           {
+                              "value" : 2,
+                              "name" : "lr_shift",
+                              "type" : "variable_if"
+                           }
+                        ],
+                        "type" : "basic",
+                        "from" : {
+                           "modifiers" : {
+                              "mandatory" : [
+                                 "left_shift"
+                              ]
+                           },
+                           "key_code" : "right_shift"
+                        },
+                        "to" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 0,
+                                 "name" : "lr_shift"
+                              }
+                           },
+                           {
+                              "set_notification_message" : {
+                                 "id" : "org.pqrs.long_lr_shift",
+                                 "text" : ""
+                              }
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "manipulators" : [
+                     {
+                        "type" : "basic",
+                        "from" : {
+                           "key_code" : "left_shift"
+                        },
+                        "to_if_alone" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "double_tap_lshift",
+                                 "value" : 2
+                              }
+                           }
+                        ],
+                        "conditions" : [
+                           {
+                              "name" : "double_tap_lshift",
+                              "type" : "variable_if",
+                              "value" : 1
+                           }
+                        ],
+                        "to" : {
+                           "key_code" : "left_shift"
+                        },
+                        "to_delayed_action" : {
+                           "to_if_invoked" : [
+                              {
+                                 "set_variable" : {
+                                    "name" : "double_tap_lshift",
+                                    "value" : 0
+                                 }
+                              },
+                              {
+                                 "key_code" : "left_shift"
+                              }
+                           ],
+                           "to_if_canceled" : [
+                              {
+                                 "set_variable" : {
+                                    "value" : 0,
+                                    "name" : "double_tap_lshift"
+                                 }
+                              },
+                              {
+                                 "key_code" : "left_shift"
+                              }
+                           ]
+                        }
+                     },
+                     {
+                        "type" : "basic",
+                        "to_if_alone" : [
+                           {
+                              "set_variable" : {
+                                 "value" : 1,
+                                 "name" : "double_tap_lshift"
+                              }
+                           }
+                        ],
+                        "from" : {
+                           "key_code" : "left_shift"
+                        },
+                        "to_delayed_action" : {
+                           "to_if_canceled" : [
+                              {
+                                 "set_variable" : {
+                                    "value" : 0,
+                                    "name" : "double_tap_lshift"
+                                 }
+                              },
+                              {
+                                 "key_code" : "left_shift"
+                              }
+                           ],
+                           "to_if_invoked" : [
+                              {
+                                 "set_variable" : {
+                                    "value" : 0,
+                                    "name" : "double_tap_lshift"
+                                 }
+                              }
+                           ]
+                        },
+                        "to" : {
+                           "key_code" : "left_shift"
+                        }
+                     }
+                  ],
+                  "description" : "Complex modifier: Double tap left shift"
+               },
+               {
+                  "description" : "Complex modifier: Double tap right shift",
+                  "manipulators" : [
+                     {
+                        "to" : {
+                           "key_code" : "right_shift"
+                        },
+                        "to_delayed_action" : {
+                           "to_if_invoked" : [
+                              {
+                                 "set_variable" : {
+                                    "value" : 0,
+                                    "name" : "double_tap_rshift"
+                                 }
+                              },
+                              {
+                                 "key_code" : "right_shift"
+                              }
+                           ],
+                           "to_if_canceled" : [
+                              {
+                                 "set_variable" : {
+                                    "name" : "double_tap_rshift",
+                                    "value" : 0
+                                 }
+                              },
+                              {
+                                 "key_code" : "right_shift"
+                              }
+                           ]
+                        },
+                        "from" : {
+                           "key_code" : "right_shift"
+                        },
+                        "to_if_alone" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "double_tap_rshift",
+                                 "value" : 2
+                              }
+                           }
+                        ],
+                        "conditions" : [
+                           {
+                              "type" : "variable_if",
+                              "name" : "double_tap_rshift",
+                              "value" : 1
+                           }
+                        ],
+                        "type" : "basic"
+                     },
+                     {
+                        "type" : "basic",
+                        "from" : {
+                           "key_code" : "right_shift"
+                        },
+                        "to_if_alone" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "double_tap_rshift",
+                                 "value" : 1
+                              }
+                           }
+                        ],
+                        "to_delayed_action" : {
+                           "to_if_invoked" : [
+                              {
+                                 "set_variable" : {
+                                    "value" : 0,
+                                    "name" : "double_tap_rshift"
+                                 }
+                              }
+                           ],
+                           "to_if_canceled" : [
+                              {
+                                 "set_variable" : {
+                                    "name" : "double_tap_rshift",
+                                    "value" : 0
+                                 }
+                              },
+                              {
+                                 "key_code" : "right_shift"
+                              }
+                           ]
+                        },
+                        "to" : {
+                           "key_code" : "right_shift"
+                        }
+                     }
+                  ]
+               },
+               {
+                  "description" : "Test Rule 1 Description",
+                  "manipulators" : []
+               },
+               {
+                  "description" : "Left-Right shift quick press + s to System Settings",
+                  "manipulators" : [
+                     {
+                        "from" : {
+                           "key_code" : "s"
+                        },
+                        "type" : "basic",
+                        "conditions" : [
+                           {
+                              "value" : 1,
+                              "name" : "lr_shift",
+                              "type" : "variable_if"
+                           }
+                        ],
+                        "to_after_key_up" : [
+                           {
+                              "set_variable" : {
+                                 "name" : "lr_shift",
+                                 "value" : 0
+                              }
+                           }
+                        ],
+                        "to" : [
+                           {
+                              "shell_command" : "/Users/steve/bin/master.sh 'System Settings'"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ]
+         },
+         "devices" : [],
+         "name" : "Generated JSON",
+         "simple_modifications" : [],
+         "fn_function_keys" : [],
+         "selected" : false,
+         "parameters" : {}
+      }
+   ],
+   "global" : {
+      "show_in_menu_bar" : "true",
+      "show_profile_name_in_menu_bar" : "true",
+      "check_for_updates_on_startup" : "true"
+   }
+}

@@ -80,10 +80,10 @@ subtest 'Update generated rules' => sub {
     # Verify results
     my $updated_config = read_karabiner_json($test_output);
     my $profiles = get_profile_names($updated_config);
-    ok(grep(/^Generated Json$/, @$profiles), 'Generated Json profile exists');
+    ok(grep(/^Generated JSON$/, @$profiles), 'Generated JSON profile exists');
     
-    my $rules = get_current_profile_rules($updated_config, 'Generated Json');
-    ok($rules, 'Got rules from Generated Json profile');
+    my $rules = get_current_profile_rules($updated_config, 'Generated JSON');
+    ok($rules, 'Got rules from Generated JSON profile');
     is(ref($rules), 'ARRAY', 'Rules is an array');
     
     # We expect exactly 2 rules from our test files
@@ -107,7 +107,7 @@ subtest 'Empty rules directory' => sub {
     ok(write_karabiner_json($config, $test_output), 'Wrote config');
     
     my $updated_config = read_karabiner_json($test_output);
-    my $rules = get_current_profile_rules($updated_config, 'Generated Json');
+    my $rules = get_current_profile_rules($updated_config, 'Generated JSON');
     is(scalar(@$rules), 0, 'No rules in profile with empty directory');
 };
 

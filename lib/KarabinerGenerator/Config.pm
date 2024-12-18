@@ -5,13 +5,13 @@ use warnings;
 use YAML::XS qw(LoadFile);
 use File::Spec;
 use File::Basename;
-use File::Temp qw(tempdir);
-use File::Path qw(make_path);
+use File::Path qw(make_path remove_tree);
 use File::Copy::Recursive qw(dircopy);
+use File::Temp qw(tempdir);
 use Cwd qw(getcwd abs_path);
 use Exporter "import";
 
-our @EXPORT_OK = qw(load_config get_path mode reset_test_environment);
+our @EXPORT_OK = qw(load_config get_path mode reset_test_environment cleanup_test_environment);
 
 # Determine project root once at compile time
 my $PROJECT_ROOT = do {
@@ -21,14 +21,17 @@ my $PROJECT_ROOT = do {
     dirname($lib_dir);
 };
 
+# Fixed test environment directory
+my $TEST_ENV_DIR = File::Spec->catdir($PROJECT_ROOT, '.tmp_dir');
+
 # Single state variable for mode
 my $MODE;
 
 # Single hash containing all paths
 my $PATHS;
 
-# Keep track of current test environment
-my $CURRENT_TEST_ENV;
+# Keep track of temp directory object for cleanup
+my $TEMP_DIR_OBJ;
 
 # Mode getter/setter
 sub mode {
@@ -45,12 +48,43 @@ BEGIN {
     mode($ENV{HARNESS_ACTIVE} ? 'test' : 'prod');
 }
 
-# New function to reset test environment
+# Reset test environment with optional cleanup
 sub reset_test_environment {
+    my %opts = @_;
+    my $cleanup = exists $opts{cleanup} ? $opts{cleanup} : 0;
+
     if ($PATHS && $PATHS->{test}) {
         delete $PATHS->{test};
-        undef $CURRENT_TEST_ENV;
     }
+
+    # Remove existing test directory if it exists
+    if (-d $TEST_ENV_DIR) {
+        remove_tree($TEST_ENV_DIR);
+    }
+
+    # Create new temp directory
+    $TEMP_DIR_OBJ = tempdir(
+        DIR => $PROJECT_ROOT,
+        TMPDIR => 0,  # Don't use system temp directory
+        CLEANUP => $cleanup
+    );
+
+    # Rename it to our desired name
+    rename($TEMP_DIR_OBJ, $TEST_ENV_DIR)
+        or die "Failed to rename temp directory: $!";
+
+    # Update the stored path
+    $TEMP_DIR_OBJ = $TEST_ENV_DIR;
+
+    return 1;
+}
+
+# Explicit cleanup of test environment
+sub cleanup_test_environment {
+    if (-d $TEST_ENV_DIR) {
+        remove_tree($TEST_ENV_DIR);
+    }
+    return 1;
 }
 
 sub path_in {
@@ -60,45 +94,68 @@ sub path_in {
 }
 
 sub _setup_test_environment {
-    # Return existing environment if it exists and is valid
-    return $PATHS->{test} if $PATHS->{test} && $CURRENT_TEST_ENV && -d $CURRENT_TEST_ENV;
+    # Return existing paths if test environment exists and is valid
+    return $PATHS->{test} if $PATHS->{test} && -d $TEST_ENV_DIR;
 
-    # Create temp directory for test files
-    my $temp_dir = tempdir(CLEANUP => 1);
-    $CURRENT_TEST_ENV = $temp_dir;
+    # Create initial test environment if it doesn't exist
+    unless (-d $TEST_ENV_DIR) {
+        reset_test_environment();
+    }
 
     # Get fixture paths
     my $fixtures_dir = path_in($PROJECT_ROOT, 't', 'fixtures');
     my $project_mockup = path_in($fixtures_dir, 'mockups', 'project');
     my $karabiner_mockup = path_in($fixtures_dir, 'mockups', 'karabiner');
 
-    # Create required directories in temp dir
-    for my $dir (qw(generated_json templates complex_modifications)) {
-        make_path(path_in($temp_dir, $dir));
+    # Create test environment structure
+    make_path(path_in($TEST_ENV_DIR, 'mockups', 'project'));
+    make_path(path_in($TEST_ENV_DIR, 'mockups', 'karabiner'));
+
+    # Create all required directories in project mockup
+    for my $dir (
+        'generated_json',
+        'templates',
+        'generated_profiles',
+        path_in('assets', 'complex_modifications')
+    ) {
+        make_path(path_in($TEST_ENV_DIR, 'mockups', 'project', $dir));
     }
 
-    # Copy project mockup files to temp directory
-    dircopy($project_mockup, $temp_dir) or die "Failed to copy project mockup: $!";
-    dircopy($karabiner_mockup, $temp_dir) or die "Failed to copy project mockup: $!";
+    # Create required directories in karabiner mockup
+    make_path(path_in($TEST_ENV_DIR, 'mockups', 'karabiner', 'assets', 'complex_modifications'));
+
+    # Copy mockup files to test directory
+    dircopy($project_mockup, path_in($TEST_ENV_DIR, 'mockups', 'project'))
+        or die "Failed to copy project mockup: $!";
+    dircopy($karabiner_mockup, path_in($TEST_ENV_DIR, 'mockups', 'karabiner'))
+        or die "Failed to copy karabiner mockup: $!";
 
     my $env_vars = "TEST_MODE=1";
     $env_vars .= " QUIET=1" if $ENV{FORCE_QUIET};
 
-    # Set up fresh test paths
+    my $test_project_dir = path_in($TEST_ENV_DIR, 'mockups', 'project');
+    my $test_karabiner_dir = path_in($TEST_ENV_DIR, 'mockups', 'karabiner');
+
+    # Set up test paths
     $PATHS->{test} = {
         cli_path => '/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli',
-        config_dir => $karabiner_mockup,
-        complex_mods_dir => path_in($temp_dir, 'assets', 'complex_modifications'),
-        templates_dir => path_in($temp_dir, 'templates'),
-        generated_json_dir => path_in($temp_dir, 'generated_json'),
-        config_yaml => path_in($temp_dir, 'config.yaml'),
-        global_config_yaml => path_in($temp_dir, 'global_config.yaml'),
-        karabiner_json => path_in($karabiner_mockup, 'karabiner.json'),
-        complex_modifiers_json => path_in($temp_dir, 'complex_modifiers.json'),
+        config_dir => $test_karabiner_dir,
+        complex_mods_dir => path_in($test_project_dir, 'assets', 'complex_modifications'),
+        templates_dir => path_in($test_project_dir, 'templates'),
+        generated_json_dir => path_in($test_project_dir, 'generated_json'),
+        generated_profiles_dir => path_in($test_project_dir, 'generated_profiles'),
+        config_yaml => path_in($test_project_dir, 'config.yaml'),
+        global_config_yaml => path_in($test_project_dir, 'global_config.yaml'),
+        profile_config_yaml => path_in($test_project_dir, 'profile_config.yaml'),
+        karabiner_json => path_in($test_karabiner_dir, 'karabiner.json'),
+        complex_modifiers_json => path_in($test_project_dir, 'complex_modifiers.json'),
         valid_complex_mod => path_in($fixtures_dir, 'valid_complex_mod.json'),
         invalid_complex_mod => path_in($fixtures_dir, 'invalid_complex_mod.json'),
         malformed_complex_mod => path_in($fixtures_dir, 'malformed_complex_mod.json'),
         json_generator => "$env_vars " . path_in($PROJECT_ROOT, 'bin', 'json_generator.pl'),
+        fixtures_dir => $fixtures_dir,
+        test_env_dir => $TEST_ENV_DIR,
+        ctrl_esc_template => path_in($fixtures_dir, 'ctrl-esc.json.tpl'),
     };
 
     return $PATHS->{test};
@@ -116,8 +173,10 @@ sub _setup_prod_environment {
         complex_mods_dir => path_in($PROJECT_ROOT, 'assets', 'complex_modifications'),
         templates_dir => path_in($PROJECT_ROOT, 'templates'),
         generated_json_dir => path_in($PROJECT_ROOT, 'generated_json'),
+        generated_profiles_dir => path_in($PROJECT_ROOT, 'generated_profiles'),
         config_yaml => path_in($PROJECT_ROOT, 'config.yaml'),
         global_config_yaml => path_in($PROJECT_ROOT, 'global_config.yaml'),
+        profile_config_yaml => path_in($PROJECT_ROOT, 'profile_config.yaml'),
         karabiner_json => path_in($config_dir, 'karabiner.json'),
         complex_modifiers_json => path_in($PROJECT_ROOT, 'complex_modifiers.json'),
         json_generator => path_in($PROJECT_ROOT, 'bin', 'json_generator.pl'),

@@ -9,7 +9,10 @@ use FindBin qw($RealBin);
 use Cwd qw(abs_path getcwd);
 use lib "$RealBin/../lib";
 
-use KarabinerGenerator::Config qw(load_config get_path mode);
+use KarabinerGenerator::Config qw(load_config get_path mode reset_test_environment);
+
+# Reset test environment before starting
+reset_test_environment();
 
 # Test mode function
 subtest 'Mode Function' => sub {
@@ -39,9 +42,8 @@ subtest 'Test Mode Paths' => sub {
 
     my $config_dir = get_path('config_dir');
     ok(-d $config_dir, 'Config directory exists');
-    like($config_dir, qr/fixtures.+mockups.+karabiner$/, 'Config dir is in mockups/karabiner');
+    like($config_dir, qr/\.tmp_dir.+mockups.+karabiner$/, 'Config dir is in mockups/karabiner');
 
-    print get_path('complex_mods_dir');
     ok(-d get_path('complex_mods_dir'), 'Complex mods directory exists');
     ok(-d get_path('templates_dir'), 'Templates directory exists');
     ok(-d get_path('generated_json_dir'), 'Generated JSON directory exists');

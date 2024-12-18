@@ -43,7 +43,7 @@ cmp_deeply(
 my $profiles = get_profile_names($config);
 cmp_deeply(
     $profiles,
-    ['Default', 'Test', 'Generated Json'],
+    ['Default', 'Test', 'Generated JSON'],
     'Profile names extracted correctly'
 );
 

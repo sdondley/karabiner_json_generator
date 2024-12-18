@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+# json_generator.pl - Generate Karabiner-Elements JSON configuration files
 
 =head1 NAME
 
@@ -13,6 +14,7 @@ json_generator.pl [options]
    -d, --debug    Enable debug output
    -i, --install  Automatically install after generation
    -e, --enable   Enable generated rules in karabiner.json (requires -i)
+   -p, --profiles Use profile-based configuration (requires -i)
    -q, --quiet    Minimize output messages
 
 =head1 DESCRIPTION
@@ -21,6 +23,10 @@ This script generates JSON configuration files for Karabiner-Elements from YAML 
 It can validate the generated files and optionally install them into your Karabiner-Elements
 configuration directory. With the -e option, it can also enable the generated rules in your
 karabiner.json configuration file.
+
+The -e and -p options are mutually exclusive:
+  -e creates a single "Generated Json" profile with all rules
+  -p uses profile configuration from profile_config.yaml to create multiple profiles
 
 =cut
 
@@ -45,14 +51,23 @@ use KarabinerGenerator::KarabinerJsonFile qw(
     write_karabiner_json
     update_generated_rules
 );
+use KarabinerGenerator::Profiles qw(
+    has_profile_config
+    generate_config
+    validate_profile_config
+    bundle_profile
+    get_profile_names
+    install_bundled_profile
+);
 
 # Command line options
 my %opts = (
-    help    => 0,
-    debug   => 0,
-    quiet   => 0,
-    install => 0,
-    enable  => 0,
+    help     => 0,
+    debug    => 0,
+    quiet    => 0,
+    install  => 0,
+    enable   => 0,
+    profiles => 0,
 );
 
 {
@@ -76,6 +91,7 @@ my %opts = (
         'q|quiet'     => \$opts{quiet},
         'i|install'   => \$opts{install},
         'e|enable'    => \$opts{enable},
+        'p|profiles'  => \$opts{profiles},
     ) or pod2usage(1);
 }
 
@@ -89,12 +105,25 @@ if ($opts{help}) {
     });
 }
 
-$ENV{QUIET} = 1 if $opts{quiet};
-
+# Maintain original error check for -e requiring -i
 if ($opts{enable} && !$opts{install}) {
     print STDERR "-e/--enable option requires -i/--install\n";
     exit 1;
 }
+
+# Then check for -e and -p conflict
+if ($opts{enable} && $opts{profiles}) {
+    print STDERR fmt_print("Cannot use -e/--enable with -p/--profiles\n", 'error');
+    exit 1;
+}
+
+# Finally check -p requiring -i
+if ($opts{profiles} && !$opts{install}) {
+    print STDERR fmt_print("-p/--profiles option requires -i/--install\n", 'error');
+    exit 1;
+}
+
+$ENV{QUIET} = 1 if $opts{quiet};
 
 my $config = load_config();
 my $complex_mods_dir = get_path('complex_mods_dir');
@@ -114,8 +143,6 @@ if ($opts{debug}) {
 
 print fmt_print("Starting JSON generation process...", 'info'), "\n\n" unless $opts{quiet};
 print fmt_print("Generating JSON files from templates...", 'info'), "\n" unless $opts{quiet};
-
-
 
 # Generate JSON files
 my @generated_files;
@@ -172,16 +199,35 @@ if ($should_install) {
             install_complex_modifiers($complex_mods_json, $complex_mods_dir);
         }
 
-        # Handle enabling rules
-        my $should_enable = $opts{enable};
-        if (!$should_enable && !$opts{quiet} && !$ENV{TEST_MODE}) {
-            print "\nWould you like to enable the generated rules in karabiner.json? [y/N] ";
-            my $answer = <STDIN>;
-            chomp $answer;
-            $should_enable = lc($answer) eq 'y' || lc($answer) eq 'yes';
-        }
+        if ($opts{profiles}) {
+            # Profile-based workflow
+            unless (has_profile_config()) {
+                print fmt_print("No profile configuration found. Generating default config...", 'info'), "\n"
+                    unless $opts{quiet};
+                generate_config();
+            }
 
-        if ($should_enable) {
+            my $validation = validate_profile_config();
+            unless ($validation->{valid}) {
+                die "Invalid profile configuration:\n" .
+                    join("\n", map { "  - $_" } @{$validation->{missing_files}});
+            }
+
+            # Get and process all profiles
+            my @profiles = get_profile_names();
+            foreach my $profile_name (@profiles) {
+                print fmt_print("Processing profile: $profile_name", 'info'), "\n" unless $opts{quiet};
+
+                # Bundle the profile
+                bundle_profile($profile_name) or die "Failed to bundle profile: $profile_name";
+
+                # Install the bundled profile
+                install_bundled_profile($profile_name) or die "Failed to install profile: $profile_name";
+            }
+
+            print fmt_print("Profiles installed successfully", 'success'), "\n" unless $opts{quiet};
+        }
+        elsif ($opts{enable}) {
             print fmt_print("Enabling generated rules...", 'info'), "\n" unless $opts{quiet};
             my $karabiner_json = get_path('karabiner_json');
             my $karabiner_config = read_karabiner_json($karabiner_json);
@@ -193,8 +239,6 @@ if ($should_install) {
                 die "Failed to write karabiner.json";
             }
             print fmt_print("Rules enabled successfully", 'success'), "\n" unless $opts{quiet};
-        } else {
-            print fmt_print("Rules not enabled", 'info'), "\n" unless $opts{quiet};
         }
     };
     if ($@) {
@@ -203,6 +247,11 @@ if ($should_install) {
     print fmt_print("Installation complete", 'success'), "\n" unless $opts{quiet};
 } else {
     print fmt_print("Installation skipped", 'info'), "\n" unless $opts{quiet};
+}
+
+if ($ENV{TEST_MODE}) {
+    print fmt_print("Test Mode: Using directory " . get_path('templates_dir'), 'info'), "\n"
+        unless $opts{quiet};
 }
 
 exit 0;
