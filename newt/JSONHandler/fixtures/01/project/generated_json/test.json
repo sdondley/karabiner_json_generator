@@ -1,0 +1,15 @@
+{
+  "title": "Test Profile",
+  "rules": [
+    {
+      "description": "Test Rule",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": { "key_code": "a" },
+          "to": [{ "key_code": "b" }]
+        }
+      ]
+    }
+  ]
+}

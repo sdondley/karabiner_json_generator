@@ -1,0 +1,25 @@
+# fixtures/04/project/yaml_configs/profile_config.yaml
+profiles:
+  Default:
+    keyboard: ansi
+    title: Default Profile
+    common: true
+    
+  ISOKeyboard:
+    keyboard: iso
+    title: ISO Keyboard Profile
+    common: true
+    
+  JISKeyboard:
+    keyboard: jis
+    title: JIS Keyboard Profile
+    common: true
+    
+  InvalidKeyboard:
+    keyboard: invalid_type
+    title: Invalid Keyboard Profile
+    common: true
+    
+  NoKeyboard:
+    title: No Keyboard Type Profile
+    common: true

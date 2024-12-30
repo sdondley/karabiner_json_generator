@@ -1,0 +1,9 @@
+# newt/fixtures/project/defaults/yaml_configs/profile_config.yaml
+common:
+  rules:
+    - ctrl-esc
+
+profiles:
+  Default:
+    title: Default
+    common: true

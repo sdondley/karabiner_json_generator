@@ -1,0 +1,15 @@
+{
+  "title": "Pretty Print Test",
+  "rules": [
+    {
+      "description": "Pretty Format Test",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": { "key_code": "a" },
+          "to": [{ "key_code": "b" }]
+        }
+      ]
+    }
+  ]
+}

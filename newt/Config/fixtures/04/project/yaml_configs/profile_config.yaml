@@ -1,0 +1,9 @@
+---
+common:
+  rules:
+  - ctrl-esc
+profiles:
+  Custom:
+    common: !!perl/ref
+      =: 1
+    title: Custom Profile

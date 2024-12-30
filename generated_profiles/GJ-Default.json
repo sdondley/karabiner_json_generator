@@ -1,0 +1,1 @@
+{"rules":[{"description":"Change left control to <esc> if pressed alone","manipulators":[{"type":"basic","to_if_alone":[{"key_code":"escape"}],"from":{"key_code":"caps_lock"},"to":[{"key_code":"left_control"}]}]}],"title":"Default"}

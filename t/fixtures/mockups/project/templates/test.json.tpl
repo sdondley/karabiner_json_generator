@@ -1,6 +1,0 @@
-
-{
-    "title": "[% test.title %]",
-    "rules": []
-}
-    

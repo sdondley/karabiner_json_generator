@@ -1,0 +1,16 @@
+{
+  "title": "Malformed Test"
+  "rules": [
+    {
+      description: "Malformed JSON"
+      manipulators: [
+        {
+          type: "basic"
+          from: {
+            key_code: "a"
+          }
+        }
+      ]
+    }
+  ]
+}

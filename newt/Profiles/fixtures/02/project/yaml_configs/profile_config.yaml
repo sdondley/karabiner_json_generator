@@ -1,0 +1,12 @@
+# t/profiles/fixtures/02/project/yaml_configs/profile_config.yaml
+common:
+  rules: ['ctrl-esc']
+profiles:
+  Default:
+    title: 'Default Profile'
+    common: true
+    rules: ['app_activators_dtls']
+  'Profile Test 02':
+    title: 'Profile Test 02'
+    common: false
+    rules: ['app_activators_dtls']

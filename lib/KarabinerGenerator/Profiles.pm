@@ -1,184 +1,148 @@
+# lib/KarabinerGenerator/Profiles.pm
 package KarabinerGenerator::Profiles;
 
 use strict;
 use warnings;
 use Exporter 'import';
-use YAML::XS qw(DumpFile LoadFile);
-use File::Spec;
-use File::Basename;
 use File::Path qw(make_path);
-use JSON;
-use KarabinerGenerator::Config qw(get_path);
+use File::Spec;
+use YAML::XS qw(LoadFile);
+use KarabinerGenerator::DebugUtils qw(db dbd);
+use KarabinerGenerator::Config qw(get_path load_config);
+use KarabinerGenerator::JSONHandler qw(read_json_file write_json_file);
 
 use constant PROFILE_PREFIX => 'GJ';
 
-# Add to @EXPORT_OK
 our @EXPORT_OK = qw(
-    PROFILE_PREFIX
     has_profile_config
-    generate_config
     validate_profile_config
-    bundle_profile
-    get_profile_names
-    install_bundled_profile
-    ensure_profile_environment
+    install_profile
+    PROFILE_PREFIX
 );
+
+sub install_profile {
+    my ($profile_name) = @_;
+    db("\n### ENTERING install_profile() ###");
+    db("Installing profile: $profile_name");
+
+    return 0 unless defined $profile_name;
+
+    # Read profile data
+    my $triggers_dir = get_path('generated_triggers_dir');
+    my $config_path = get_path('profile_config_yaml');
+    my $config = eval { LoadFile($config_path) } or return 0;
+    my $profile = $config->{profiles}{$profile_name} or return 0;
+
+    # Collect rules from common and profile config
+    my @rules;
+    if ($profile->{common}) {
+        push @rules, @{$config->{common}{rules}} if $config->{common} && $config->{common}{rules};
+    }
+    push @rules, @{$profile->{rules}} if $profile->{rules};
+
+    # Get rule data from trigger files
+    my @rule_data;
+    for my $rule (@rules) {
+        my $file = File::Spec->catfile($triggers_dir, "$rule.json");
+        next unless -f $file;
+
+        my $data = eval { read_json_file($file) };
+        next if $@;
+        push @rule_data, @{$data->{rules}} if $data->{rules};
+    }
+
+    # Update karabiner.json
+    my $karabiner_json = get_path('karabiner_json');
+    my $kb_config = eval { read_json_file($karabiner_json) };
+    return 0 if $@;
+
+    # Create or update profile
+    my $full_name = PROFILE_PREFIX . "-$profile_name";
+    my ($kb_profile) = grep { $_->{name} eq $full_name } @{$kb_config->{profiles}};
+
+    unless ($kb_profile) {
+        push @{$kb_config->{profiles}}, {
+            name => $full_name,
+            complex_modifications => { rules => [] },
+            parameters => {},
+            selected => JSON::false,
+            simple_modifications => [],
+            fn_function_keys => [],
+            devices => []
+        };
+        $kb_profile = $kb_config->{profiles}[-1];
+    }
+
+    # Update profile rules
+    $kb_profile->{complex_modifications}{rules} = \@rule_data;
+
+    # Only set virtual_hid_keyboard if keyboard type is specified
+    if (exists $profile->{keyboard}) {
+        my $keyboard_type = $profile->{keyboard};
+        # Validate and default to ansi if invalid
+        $keyboard_type = 'ansi' unless $keyboard_type =~ /^(?:ansi|iso|jis)$/;
+        $kb_profile->{virtual_hid_keyboard} = {
+            keyboard_type_v2 => $keyboard_type
+        };
+    }
+
+    # Save changes
+    eval { write_json_file($karabiner_json, $kb_config) };
+    return 0 if $@;
+
+    return 1;
+}
 
 sub has_profile_config {
     my $config_path = get_path('profile_config_yaml');
     return -f $config_path;
 }
 
-sub ensure_profile_environment {
-    my $dirs = {
-        templates_dir => get_path('templates_dir'),
-        generated_json_dir => get_path('generated_json_dir'),
-        generated_profiles_dir => get_path('generated_profiles_dir'),
-        complex_mods_dir => get_path('complex_mods_dir')
-    };
-
-    # Create all required directories
-    for my $dir_key (keys %$dirs) {
-        my $dir = $dirs->{$dir_key};
-        make_path($dir) unless -d $dir;
-    }
-
-    # Generate profile config if it doesn't exist
-    unless (has_profile_config()) {
-        generate_config();
-    }
-
-    # Create basic template if templates directory is empty
-    my $template_dir = $dirs->{templates_dir};
-    my @templates = glob(File::Spec->catfile($template_dir, "*.json.tpl"));
-    unless (@templates) {
-        my $basic_template = File::Spec->catfile($template_dir, "ctrl-esc.json.tpl");
-        open my $fh, '>', $basic_template or die "Cannot create template: $!";
-        print $fh qq{
-{
-    "title": "Control/Escape Key",
-    "rules": [
-        {
-            "description": "Control/Escape",
-            "manipulators": [
-                {
-                    "type": "basic",
-                    "from": { "key_code": "escape" },
-                    "to": [{ "key_code": "control" }]
-                }
-            ]
-        }
-    ]
-}
-};
-        close $fh;
-    }
-
-    # Generate basic rule file if json directory is empty
-    my $json_dir = $dirs->{generated_json_dir};
-    my @rules = glob(File::Spec->catfile($json_dir, "*.json"));
-    unless (@rules) {
-        my $basic_rule = File::Spec->catfile($json_dir, "ctrl-esc.json");
-        open my $fh, '>', $basic_rule or die "Cannot create rule: $!";
-        print $fh qq{
-{
-    "title": "Control/Escape Key",
-    "rules": [
-        {
-            "description": "Control/Escape",
-            "manipulators": [
-                {
-                    "type": "basic",
-                    "from": { "key_code": "escape" },
-                    "to": [{ "key_code": "control" }]
-                }
-            ]
-        }
-    ]
-}
-};
-        close $fh;
-    }
-
-    return 1;
-}
-
-sub generate_config {
-    my $config_path = get_path('profile_config_yaml');
-
-    # Define default configuration
-    my $config = {
-        common => {
-            rules => ['ctrl-esc']
-        },
-        profiles => {
-            Default => {
-                title => 'Default',
-                common => \1  # YAML::XS boolean true
-            }
-        }
-    };
-
-    eval {
-        DumpFile($config_path, $config);
-    };
-
-    if ($@) {
-        warn "Failed to generate profile config: $@";
-        return 0;
-    }
-
-    return -f $config_path;
-}
-
 sub validate_profile_config {
-    my $config_path = get_path('profile_config_yaml');
     my $generated_json_dir = get_path('generated_json_dir');
+    my $full_config = load_config();
 
-    # Check if config file exists
-    unless (-f $config_path) {
+    unless ($full_config) {
         return {
             valid => 0,
             missing_files => [],
-            error => 'Profile config file does not exist'
+            error => 'Failed to load configuration'
         };
     }
 
-    # Load config file
-    my $config;
-    eval {
-        $config = LoadFile($config_path);
-    };
-    if ($@) {
-        return {
-            valid => 0,
-            missing_files => [],
-            error => "Failed to parse config file: $@"
-        };
-    }
-
-    # Collect all rule files that should exist
+    my $profile_config = $full_config->{profiles} || {};
     my @required_files;
 
-    # Add common rules
-    if ($config->{common} && $config->{common}{rules}) {
-        push @required_files, @{$config->{common}{rules}};
-    }
-
-    # Add profile-specific rules
-    if ($config->{profiles}) {
-        foreach my $profile (values %{$config->{profiles}}) {
-            next unless ref $profile eq 'HASH' && $profile->{rules};
-            push @required_files, @{$profile->{rules}};
+    if ($profile_config->{common} && $profile_config->{common}{rules}) {
+        for my $rule (@{$profile_config->{common}{rules}}) {
+            push @required_files, {
+                rule => $rule,
+                subdir => 'triggers'
+            };
         }
     }
 
-    # Check for missing files
+    if ($profile_config->{profiles}) {
+        foreach my $profile_name (keys %{$profile_config->{profiles}}) {
+            my $profile = $profile_config->{profiles}{$profile_name};
+            if (ref $profile eq 'HASH' && $profile->{rules}) {
+                for my $rule (@{$profile->{rules}}) {
+                    push @required_files, {
+                        rule => $rule,
+                        subdir => 'triggers'
+                    };
+                }
+            }
+        }
+    }
+
     my @missing_files;
-    foreach my $rule (@required_files) {
-        my $json_file = "$rule.json";
-        my $full_path = File::Spec->catfile($generated_json_dir, $json_file);
-        push @missing_files, $json_file unless -f $full_path;
+    foreach my $file_info (@required_files) {
+        my $json_file = "$file_info->{rule}.json";
+        my $full_path = File::Spec->catfile($generated_json_dir, $file_info->{subdir}, $json_file);
+        unless (-f $full_path) {
+            push @missing_files, "$file_info->{subdir}/$json_file";
+        }
     }
 
     return {
@@ -186,99 +150,6 @@ sub validate_profile_config {
         missing_files => \@missing_files,
         error => scalar(@missing_files) ? 'Missing required JSON files' : undef
     };
-}
-
-sub bundle_profile {
-    my ($profile_name) = @_;
-    return 0 unless defined $profile_name;
-
-    my $profiles_dir = get_path('generated_profiles_dir');
-    my $json_dir = get_path('generated_json_dir');
-    my $config_path = get_path('profile_config_yaml');
-
-    # Ensure profiles directory exists
-    make_path($profiles_dir) unless -d $profiles_dir;
-
-    # Load and validate profile config
-    my $config = eval { LoadFile($config_path) } or return 0;
-    my $profile = $config->{profiles}{$profile_name} or return 0;
-
-    # Collect rules to bundle
-    my @rules;
-
-    # Add common rules if profile uses them
-    if ($profile->{common}) {
-        push @rules, @{$config->{common}{rules}} if $config->{common} && $config->{common}{rules};
-    }
-
-    # Add profile-specific rules
-    push @rules, @{$profile->{rules}} if $profile->{rules};
-
-    # Read and combine all rule files
-    my @rule_data;
-    for my $rule (@rules) {
-        my $file = File::Spec->catfile($json_dir, "$rule.json");
-        next unless -f $file;
-
-        open my $fh, '<', $file or next;
-        my $content = do { local $/; <$fh> };
-        close $fh;
-
-        my $data = eval { decode_json($content) } or next;
-        push @rule_data, @{$data->{rules}} if $data->{rules};
-    }
-
-    # Create bundled profile
-    my $bundled = {
-        title => $profile->{title} || $profile_name,
-        rules => \@rule_data
-    };
-
-    # Write bundled file
-    my $output_file = File::Spec->catfile($profiles_dir, PROFILE_PREFIX . "-$profile_name.json");
-    open my $out_fh, '>', $output_file or return 0;
-    print $out_fh encode_json($bundled);
-    close $out_fh;
-
-    return 1;
-}
-
-sub get_profile_names {
-    my $config_path = get_path('profile_config_yaml');
-    return () unless -f $config_path;
-
-    my $config = eval { LoadFile($config_path) } or return ();
-    return () unless $config && $config->{profiles};
-
-    return keys %{$config->{profiles}};
-}
-
-sub install_bundled_profile {
-    my ($profile_name) = @_;
-    return 0 unless defined $profile_name;
-
-    my $profiles_dir = get_path('generated_profiles_dir');
-    my $complex_mods_dir = get_path('complex_mods_dir');
-    my $bundle_file = File::Spec->catfile($profiles_dir, PROFILE_PREFIX . "-$profile_name.json");
-
-    # Check if bundle exists
-    unless (-f $bundle_file) {
-        warn "Bundle file does not exist for profile: $profile_name" unless $ENV{HARNESS_ACTIVE};
-        return 0;
-    }
-
-    # Install the bundle
-    my $dest_file = File::Spec->catfile($complex_mods_dir, PROFILE_PREFIX . "-$profile_name.json");
-    eval {
-        make_path($complex_mods_dir) unless -d $complex_mods_dir;
-        File::Copy::copy($bundle_file, $dest_file) or die $!;
-    };
-    if ($@) {
-        warn "Failed to install profile $profile_name: $@" unless $ENV{HARNESS_ACTIVE};
-        return 0;
-    }
-
-    return -f $dest_file;
 }
 
 1;

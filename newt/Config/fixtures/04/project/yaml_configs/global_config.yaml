@@ -1,0 +1,4 @@
+# Custom paths for Karabiner-Elements
+karabiner:
+  config_dir: "/custom/path/to/config"
+  complex_mods_dir: "/custom/path/to/complex_mods"

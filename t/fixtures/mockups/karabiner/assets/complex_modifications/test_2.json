@@ -1,9 +1,0 @@
-{
-    "title": "Test Rule 2", 
-    "rules": [
-        {
-            "description": "Test Rule 2 Description",
-            "manipulators": []
-        }
-    ]
-}

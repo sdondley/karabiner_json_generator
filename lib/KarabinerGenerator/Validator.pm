@@ -5,6 +5,7 @@ use Exporter "import";
 use KarabinerGenerator::Terminal qw(fmt_print);
 use KarabinerGenerator::Config qw(get_path);
 use KarabinerGenerator::CLI qw(run_ke_cli_cmd);
+use KarabinerGenerator::Init qw(is_test_mode);
 
 our @EXPORT_OK = qw(validate_files);
 
@@ -15,7 +16,7 @@ sub validate_files {
 
     foreach my $file (@files) {
         unless (-f $file) {
-            warn "File does not exist: $file" unless $ENV{QUIET};
+            warn "File does not exist: $file" unless is_test_mode();
             push @failed_files, $file;
             next;
         }

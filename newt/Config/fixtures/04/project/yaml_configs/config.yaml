@@ -1,0 +1,8 @@
+app_activators:
+  title: "Custom App Activators"
+  shell_command: "/Users/steve/bin/master.sh"
+  modifiers:
+    double_tap_rshift:
+      apps:
+        - trigger_key: "t"
+          app_name: "Terminal"

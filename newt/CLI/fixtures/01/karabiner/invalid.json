@@ -1,0 +1,16 @@
+{
+  "title": "Invalid Test",
+  "rules": [
+    {
+      "description": "Invalid Rule",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "invalid_field": true
+          }
+        }
+      ]
+    }
+  ]
+}

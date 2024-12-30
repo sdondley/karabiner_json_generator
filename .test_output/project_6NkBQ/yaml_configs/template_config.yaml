@@ -1,0 +1,10 @@
+# newt/fixtures/project/defaults/yaml_configs/template_config.yaml
+ruleset:
+  ruleset_group: app_activators
+  title: "App Activators"
+  shell_command: "/Users/steve/bin/master.sh"
+  modifiers:
+    double_tap_lshift:
+      apps:
+        - trigger_key: "i"
+          app_name: "iTerm"
