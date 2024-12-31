@@ -2,13 +2,9 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use Test::Exception;
-use FindBin;
-use lib "$FindBin::Bin/../../lib";
 
 use KarabinerGenerator::Config qw(get_home_directory get_path);
-use KarabinerGenerator::Init qw(init is_test_mode);
-use KarabinerGenerator::DebugUtils qw(db);
+use KarabinerGenerator::Init qw(init is_test_mode db);
 
 db("Starting basic config tests");
 

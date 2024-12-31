@@ -2,9 +2,6 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use FindBin;
-use lib "$FindBin::Bin/../../../lib";
-use lib "$FindBin::Bin/../../ManifestTest";
 
 use KarabinerGenerator::Init qw(init db dbd);
 use KarabinerGenerator::Config qw(get_path);

@@ -1,13 +1,10 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use FindBin qw($RealBin);
-use lib "$RealBin/../../lib";
-use File::Spec;
+use KarabinerGenerator::Generator;
 use KarabinerGenerator::Init qw(init db);
 use KarabinerGenerator::TestEnvironment::Loader qw(load_project_defaults load_karabiner_defaults load_test_fixtures);
 
-require "$RealBin/../../bin/json_generator.pl";
 
 db("\n### ENTERING arg_validation test ###");
 init();

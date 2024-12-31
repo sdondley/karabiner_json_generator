@@ -2,8 +2,6 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use FindBin qw($RealBin);
-use lib "$RealBin/../../lib";
 use File::Spec;
 use File::Path qw(make_path);
 use File::Basename qw(dirname basename);

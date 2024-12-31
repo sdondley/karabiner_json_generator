@@ -2,9 +2,6 @@
 use strict;
 use warnings;
 use Test::Most;
-use FindBin qw($RealBin);
-use lib "$FindBin::Bin/../../../lib";
-use lib "$FindBin::Bin/../../ManifestTest";
 use KarabinerGenerator::Init qw(init db);
 use KarabinerGenerator::Config qw(get_path);
 use KarabinerGenerator::JSONHandler qw(read_json_file);

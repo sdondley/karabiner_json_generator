@@ -3,9 +3,6 @@ use strict;
 use warnings;
 use Test::Most 'die';
 use Test::Exception;
-use FindBin;
-use lib "$FindBin::Bin/../../lib";
-use File::Spec;
 
 use KarabinerGenerator::Config qw(get_path);
 use KarabinerGenerator::Init qw(init is_test_mode db);

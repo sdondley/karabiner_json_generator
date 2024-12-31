@@ -2,8 +2,6 @@
 use strict;
 use warnings;
 use Test::More;
-use FindBin;
-use lib "$FindBin::Bin/../../../lib";
 use Data::Dumper;
 
 # Skip test unless AUTHOR_TESTING is set

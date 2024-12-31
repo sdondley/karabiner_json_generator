@@ -20,18 +20,18 @@ our @EXPORT_OK = qw(run_manifest_test);
 our $PROJECT_ROOT;
 BEGIN {
     my $manifest_path = abs_path(__FILE__);
-    $PROJECT_ROOT = dirname(dirname(dirname($manifest_path)));
+    $PROJECT_ROOT = dirname($manifest_path);
 }
 
 # Track our temp file
 my ($RUN_FH, $RUN_FILE);
 
 sub _get_manifest_path {
-    return "$PROJECT_ROOT/newt/ManifestTest/Manifest.yaml";
+    return "$PROJECT_ROOT/Manifest.yaml";
 }
 
 sub _find_all_modules {
-    my $lib_dir = File::Spec->catdir($PROJECT_ROOT, 'lib');
+    my $lib_dir = File::Spec->catdir($PROJECT_ROOT, '..', '..');
     db("Scanning lib directory: $lib_dir");
     my @pm_files;
 
@@ -293,7 +293,7 @@ sub run_manifest_test {
     db("Creating temp file to mark completion");
     ($RUN_FH, $RUN_FILE) = tempfile(
         'manifest_run_XXXX',
-        DIR => "$PROJECT_ROOT/.test_output",
+        DIR => "$PROJECT_ROOT/../../../.test_output",
         UNLINK => 1
     );
     print $RUN_FH "1\n";

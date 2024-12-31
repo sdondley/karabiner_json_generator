@@ -4,15 +4,13 @@ use strict;
 use warnings;
 use Test::More;
 use File::Spec;
-use FindBin;
-use lib "$FindBin::Bin/../../lib";
 use KarabinerGenerator::Init qw(init);
 
 # Initialize test environment
 init();
 
 # Load modules
-use_ok('KarabinerGenerator::Validator', 'validate_files') 
+use_ok('KarabinerGenerator::Validator', 'validate_files')
     or BAIL_OUT("Couldn't load KarabinerGenerator::Validator");
 
 use KarabinerGenerator::TestEnvironment::Loader qw(load_test_fixtures);
@@ -41,7 +39,7 @@ subtest 'File Validation' => sub {
         or diag("Multiple file validation unexpectedly passed");
 
     # Test non-existent file fails
-    ok(!validate_files('newt/Validator/fixtures/01/karabiner/nonexistent.json'), 
+    ok(!validate_files('newt/Validator/fixtures/01/karabiner/nonexistent.json'),
        'Non-existent file fails validation')
         or diag("Non-existent file validation unexpectedly passed");
 };

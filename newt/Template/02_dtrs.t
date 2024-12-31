@@ -4,9 +4,7 @@ use warnings;
 use Test::More;
 use Test::Exception;
 use JSON qw(decode_json);
-use FindBin;
 use File::Spec;
-use lib "$FindBin::Bin/../../lib";
 
 use KarabinerGenerator::Init qw(init is_test_mode db dbd);
 use KarabinerGenerator::Config qw(get_path load_config);

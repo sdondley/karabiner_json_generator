@@ -3,9 +3,6 @@
 use strict;
 use warnings;
 use Test::More;
-use File::Spec;
-use FindBin;
-use lib "$FindBin::Bin/../../lib";
 use KarabinerGenerator::Init qw(init);
 
 # Initialize test environment

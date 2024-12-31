@@ -2,8 +2,6 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use FindBin;
-use lib "$FindBin::Bin/../../lib";
 
 use KarabinerGenerator::Init qw(init db dbd);
 use KarabinerGenerator::TestEnvironment::Loader qw(

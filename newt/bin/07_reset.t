@@ -2,9 +2,7 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use FindBin qw($RealBin);
-use lib "$RealBin/../../lib";
-require "$RealBin/../../bin/json_generator.pl";
+use KarabinerGenerator::Generator;
 use KarabinerGenerator::Config qw(get_path load_config);  # Added load_config
 use KarabinerGenerator::Init qw(init db);
 use KarabinerGenerator::TestEnvironment::Loader qw(load_project_defaults load_karabiner_defaults);

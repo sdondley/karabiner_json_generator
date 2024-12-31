@@ -3,9 +3,6 @@ use strict;
 use warnings;
 use Test::Most 'die';
 use Test::Exception;
-use FindBin;
-use lib "$FindBin::Bin/../../../lib";
-use lib "$FindBin::Bin/../../ManifestTest";
 use File::Path qw(rmtree);  # Added rmtree import
 
 use KarabinerGenerator::Init qw(init is_test_mode db);

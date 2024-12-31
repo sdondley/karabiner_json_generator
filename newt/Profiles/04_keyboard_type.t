@@ -2,8 +2,6 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use FindBin qw($RealBin);
-use lib "$RealBin/../../lib";
 use KarabinerGenerator::Config qw(get_path);
 use KarabinerGenerator::Init qw(init db);
 use KarabinerGenerator::JSONHandler qw(read_json_file);

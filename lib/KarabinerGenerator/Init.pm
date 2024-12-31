@@ -2,10 +2,7 @@
 package KarabinerGenerator::Init;
 
 BEGIN {
-    require lib;
-    use FindBin;
-    my $manifest_path = "$FindBin::Bin/../../newt/ManifestTest";
-    lib->import($manifest_path);
+    use KarabinerGenerator::ManifestTest::ManifestTest qw(run_manifest_test);
 
     require File::Temp;
     $File::Temp::KEEP_ALL = 1 if $ENV{KEEP_ALL};
@@ -27,8 +24,6 @@ use KarabinerGenerator::Config qw(
     get_home_directory
     initialize_test_directories
 );
-use lib "$RealBin/../newt/ManifestTest";
-use ManifestTest qw(run_manifest_test);
 
 our @EXPORT_OK = qw(
     init

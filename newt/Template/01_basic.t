@@ -2,11 +2,8 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use Test::Exception;
 use JSON qw(decode_json);
-use FindBin;
 use File::Spec;
-use lib "$FindBin::Bin/../../lib";
 
 use KarabinerGenerator::Init qw(init is_test_mode db);
 use KarabinerGenerator::Config qw(get_path load_config);

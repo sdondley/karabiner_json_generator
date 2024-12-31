@@ -2,12 +2,8 @@
 use strict;
 use warnings;
 use Test::Most 'die';
-use Test::Exception;
 use Test::Warn;
-use FindBin;
 use File::Path qw(rmtree);
-use lib "$FindBin::Bin/../../lib";
-use lib "$FindBin::Bin/../../ManifestTest";
 
 use KarabinerGenerator::Init qw(init is_test_mode db);
 use KarabinerGenerator::Config qw(get_path load_config);

@@ -4,8 +4,6 @@ use warnings;
 use Test::Most 'die';
 use Test::Exception;
 use File::Spec;
-use FindBin;
-use lib "$FindBin::Bin/../../lib";
 
 use KarabinerGenerator::KarabinerInstallation qw(find_karabiner_installation);
 
