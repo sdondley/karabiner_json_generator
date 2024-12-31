@@ -8,6 +8,7 @@ use KarabinerGenerator::JSONHandler qw(read_json_file write_json_file validate_j
 use KarabinerGenerator::Init qw(is_test_mode db);
 use KarabinerGenerator::CLI qw(run_ke_cli_cmd);
 use KarabinerGenerator::ComplexModifications qw(collect_all_rules);
+use KarabinerGenerator::Config qw(get_path);
 
 our @EXPORT_OK = qw(
     validate_karabiner_json
@@ -17,7 +18,50 @@ our @EXPORT_OK = qw(
     clear_profile_rules
     add_profile_rules
     update_generated_rules
+    reset_karabiner_json
 );
+
+sub reset_karabiner_json {
+    db("\n### ENTERING reset_karabiner_json() ###");
+
+    my $file_path = get_path('karabiner_json');
+    db("Using karabiner_json path: $file_path");
+
+    # Create minimal valid configuration
+    my $config = {
+        global => {
+            check_for_updates_on_startup => JSON::true,
+            show_in_menu_bar => JSON::true,
+            show_profile_name_in_menu_bar => JSON::false
+        },
+        profiles => [
+            {
+                name => "Default",
+                complex_modifications => {
+                    rules => []
+                },
+                devices => [],
+                fn_function_keys => [],
+                parameters => {
+                    delay_milliseconds_before_open_device => 1000
+                },
+                selected => JSON::true,
+                simple_modifications => []
+            }
+        ]
+    };
+
+    # Write the configuration
+    eval {
+        write_json_file($file_path, $config);
+    };
+    if ($@) {
+        db("Error writing file: $@");
+        return 0;
+    }
+
+    return 1;
+}
 
 sub validate_karabiner_json {
     my ($file_path) = @_;

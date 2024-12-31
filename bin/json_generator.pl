@@ -9,11 +9,13 @@ use lib "$RealBin/../lib";
 use Getopt::Long qw(:config bundling no_ignore_case);
 use Pod::Usage;
 use File::Spec;
+use KarabinerGenerator::Cleaner qw(clean_generated_files);
 use KarabinerGenerator::Installer qw(install_files);
 use KarabinerGenerator::Config qw(get_path load_config);
 use KarabinerGenerator::Init qw(init db dbd is_test_mode);
 use KarabinerGenerator::Template qw(process_templates);
 use KarabinerGenerator::Terminal qw(fmt_print);
+use KarabinerGenerator::KarabinerInstallation::JSONFile qw(reset_karabiner_json);
 use KarabinerGenerator::JSONHandler qw(read_json_file write_json_file);
 #use KarabinerGenerator::KarabinerInstallation qw(reset_karabiner_installation);
 use KarabinerGenerator::Profiles qw(
@@ -106,7 +108,14 @@ sub run {
         }
 
         print fmt_print("Resetting Karabiner configuration...", 'info'), "\n" unless $opts{quiet};
-        reset_karabiner_installation();
+
+        # Clean up generated files
+        my $cleaned = clean_generated_files();
+        print fmt_print("Cleaned up $cleaned generated files", 'info'), "\n" unless $opts{quiet};
+
+        # Reset karabiner.json
+        reset_karabiner_json() or die fmt_print("Failed to reset configuration", 'error'), "\n";
+
         print fmt_print("Reset complete", 'success'), "\n" unless $opts{quiet};
         return [];
     }

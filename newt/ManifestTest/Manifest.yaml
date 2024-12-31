@@ -1,6 +1,10 @@
 ---
 KarabinerGenerator::CLI:
 - run_ke_cli_cmd
+KarabinerGenerator::Cleaner:
+- _is_hidden_path
+- clean_generated_files
+- find_generated_files
 KarabinerGenerator::ComplexModifications:
 - collect_all_rules
 - get_rule_metadata
@@ -49,6 +53,7 @@ KarabinerGenerator::KarabinerInstallation::JSONFile:
 - clear_profile_rules
 - get_current_profile
 - get_profile_names
+- reset_karabiner_json
 - update_generated_rules
 - validate_karabiner_json
 KarabinerGenerator::Profiles:
